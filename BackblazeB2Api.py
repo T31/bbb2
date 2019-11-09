@@ -47,5 +47,23 @@ def cancel_large_file(api_url, auth_token, file_id):
         msg = "HTTP response status wasn't OK(200). " + str(response)
         raise BackblazeB2Error(msg)
 
+def get_upload_url(api_url, auth_token, bucket_id):
+    headers = dict()
+    headers["Authorization"] = auth_token
+
+    body = dict()
+    body["bucketId"] = bucket_id
+
+    response = util.http.send_request(api_url, util.http.Method.POST, headers,
+                                      body)
+
+    if http.HTTPStatus.OK != response.status_code:
+        msg = "HTTP response status wasn't OK(200). " + str(response)
+        raise BackblazeB2Error(msg)
+
+    json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
+    return (json_body["bucketId"], json_body["uploadUrl"],
+            json_body["authorizationToken"])
+
 if "__main__" == __name__:
     authorize("asdf", "asdf")
