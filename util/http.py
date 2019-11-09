@@ -65,17 +65,27 @@ class Url:
         return str(self.domain) + str(self.path)
 
 class Response:
+    req_url = None
+    req_headers = None
+    req_body = None
     status_code = None
     resp_headers = None
     resp_body = None
 
-    def __init__(self, status_code, resp_headers, resp_body):
+    def __init__(self, req_url, req_headers, req_body, status_code,
+                 resp_headers, resp_body):
+        self.req_url = req_url
+        self.req_headers = req_headers
+        self.req_body = req_body
         self.status_code = status_code
         self.resp_headers = resp_headers
         self.resp_body = resp_body
 
     def __str__(self):
-        return ("StatusCode=\"" + str(self.status_code) + "\""
+        return ("ReqUrl=\"" + str(self.req_url) + "\""
+                + ", ReqHeaders=\"" + str(self.req_headers) + "\""
+                + ", ReqBody=\"" + str(self.req_body) + "\""
+                + ", StatusCode=" + str(self.status_code)
                 + ", RespHeaders=\"" + str(self.resp_headers) + "\""
                 + ", RespBody=\"" + str(self.resp_body) + "\"")
 
@@ -101,7 +111,8 @@ def send_request(url, method, headers, body):
                                    + ")")
 
         response = connection.getresponse()
-        return Response(response.status, response.getheaders(), response.read())
+        return Response(url, headers, body, response.status,
+                        response.getheaders(), response.read())
     except ConnectionResetError as e:
         msg = "Connection error during HTTP request. Url=\"" + str(url) + "\""
         msg += ", method=\"" + str(method) + "\""
