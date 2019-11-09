@@ -74,3 +74,34 @@ class Response:
         return ("StatusCode=\"" + str(self.status_code) + "\""
                 + ", RespHeaders=\"" + str(self.resp_headers) + "\""
                 + ", RespBody=\"" + str(self.resp_body) + "\"")
+
+def send_request(url, method, headers, body):
+    connection = None
+    if Protocol.HTTP == url.protocol:
+        connection = http.client.HTTPConnection(host=str(url.domain))
+    elif Protocol.HTTPS == url.protocol:
+        connection = http.client.HTTPSConnection(host=str(url.domain))
+    else:
+        raise BackblazeB2Error("Invalid protocol value in URL ("
+                               + str(url.protocol) + ")")
+
+    try:
+        if Method.GET == method:
+            connection.request(method='GET', url=str(url.path), headers=headers)
+        elif Method.POST == method:
+            connection.request(method='POST', url=str(url.path),
+                               headers=headers, body=body)
+        else:
+            raise BackblazeB2Error("Invalid HTTP method value (" + str(method)
+                                   + ")")
+
+        response = connection.getresponse()
+        return Response(response.status, response.getheaders(), response.read())
+    except ConnectionResetError as e:
+        msg = "Connection error during HTTP request. Url=\"" + str(url) + "\""
+        msg += ", method=\"" + str(method) + "\""
+        msg += ", req_headers=\"" + str(headers) + "\""
+        msg += ", req_body=\"" + str(body) + "\"."
+        raise BackblazeB2Error(msg) from e
+    finally:
+        connection.close()
