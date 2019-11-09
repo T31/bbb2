@@ -49,6 +49,40 @@ class Url:
         self.domain = domain
         self.path = path
 
+    def from_string(self, url_string):
+        start_idx_inc = 0
+        end_idx_ex = url_string.find("://")
+        if -1 == end_idx_ex:
+            raise BackblazeB2Error("Malformed URL (" + url_string + ").")
+
+        proto_string = url_string[start_idx_inc:end_idx_ex]
+        if "http" == proto_string:
+            self.protocol = Protocol.HTTP
+        elif "https" == proto_string:
+            self.protocol = Protocol.HTTPS
+        else:
+            raise BackblazeB2Error("Malformed URL (" + url_string + ").")
+
+        start_idx_inc = url_string.find("://") + len("://")
+        if start_idx_inc >= len(url_string):
+            raise BackblazeB2Error("Malformed URL (" + url_string + ").")
+
+        end_idx_ex = url_string.find("/", start_idx_inc)
+        if -1 != end_idx_ex:
+            domain_list = url_string[start_idx_inc:end_idx_ex].split(".")
+            self.domain = Domain(domain_list)
+        else:
+            self.domain = Domain(url_string[start_idx_inc:].split("."))
+
+        start_idx_inc = end_idx_ex
+        if -1 == start_idx_inc:
+            self.path = Path([])
+        elif (start_idx_inc + len("/")) >= len(url_string):
+            self.path = Path([])
+        else:
+            start_idx_inc += len("/")
+            self.path = Path(url_string[start_idx_inc:].split("/"))
+
     def __str__(self):
         protoString = ""
         if Protocol.HTTP == self.protocol:
@@ -121,3 +155,8 @@ def send_request(url, method, headers, body):
         raise BackblazeB2Error(msg) from e
     finally:
         connection.close()
+
+if "__main__" == __name__:
+    u = Url(Protocol.HTTP, [], [])
+    u.from_string("htp://asdf.asdf.asdf/")
+    print(str(u))
