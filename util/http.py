@@ -1,6 +1,8 @@
 import enum
 import http.client
 
+from BackblazeB2Error import BackblazeB2Error
+
 class Protocol(enum.Enum):
     HTTP = 0
     HTTPS = 1
@@ -158,5 +160,5 @@ def send_request(url, method, headers, body):
 
 if "__main__" == __name__:
     u = Url(Protocol.HTTP, [], [])
-    u.from_string("htp://asdf.asdf.asdf/")
+    u.from_string("https://asdf.asdf.asdf/")
     print(str(u))
