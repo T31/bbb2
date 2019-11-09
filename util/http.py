@@ -7,7 +7,7 @@ class Protocol(enum.Enum):
 
 class Method(enum.Enum):
     GET = 0
-    POST = 0
+    POST = 1
 
 class Domain:
     domain = []
