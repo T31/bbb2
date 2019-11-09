@@ -1,5 +1,6 @@
 import BackblazeB2Api
 import BackblazeB2ClientUtil
+from BackblazeB2Error import BackblazeB2Error
 import util.http
 
 class BackblazeB2Client:
@@ -38,3 +39,6 @@ class BackblazeB2Client:
         self.download_url = temp_download_url
         self.min_upload_part_bytes = temp_min_upload_part_bytes
         self.recommended_upload_part_bytes = temp_recommended_upload_part_bytes
+
+    def cancel_large_file(self, file_id):
+        BackblazeB2Api.cancel_large_file(api_url, auth_token, file_id)

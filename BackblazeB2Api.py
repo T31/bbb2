@@ -32,5 +32,20 @@ def authorize(account_id, application_id):
         msg = ("HTTP response JSON parse failed. " + str(response))
         raise BackblazeB2Error(msg)
 
+def cancel_large_file(api_url, auth_token, file_id):
+    headers = dict()
+    headers["Authorization"] = auth_token
+
+    body = dict()
+    body["fileId"] = file_id
+    body = json.dumps(body)
+
+    response = util.http.send_request(api_url, util.http.Method.POST, headers,
+                                      body)
+
+    if http.HTTPStatus.OK != response.status_code:
+        msg = "HTTP response status wasn't OK(200). " + str(response)
+        raise BackblazeB2Error(msg)
+
 if "__main__" == __name__:
     authorize("asdf", "asdf")
