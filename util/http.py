@@ -59,3 +59,18 @@ class Url:
                                    + str(self.protocol) + ")")
 
         return protoString + "://" + str(self.domain) + str(self.path)
+
+class Response:
+    status_code = None
+    resp_headers = None
+    resp_body = None
+
+    def __init__(self, status_code, resp_headers, resp_body):
+        self.status_code = status_code
+        self.resp_headers = resp_headers
+        self.resp_body = resp_body
+
+    def __str__(self):
+        return ("StatusCode=\"" + str(self.status_code) + "\""
+                + ", RespHeaders=\"" + str(self.resp_headers) + "\""
+                + ", RespBody=\"" + str(self.resp_body) + "\"")
