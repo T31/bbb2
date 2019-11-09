@@ -1,4 +1,5 @@
 import enum
+import http.client
 
 class Protocol(enum.Enum):
     HTTP = 0
@@ -60,6 +61,9 @@ class Url:
 
         return protoString + "://" + str(self.domain) + str(self.path)
 
+    def to_str_no_proto(self):
+        return str(self.domain) + str(self.path)
+
 class Response:
     status_code = None
     resp_headers = None
@@ -87,9 +91,10 @@ def send_request(url, method, headers, body):
 
     try:
         if Method.GET == method:
-            connection.request(method='GET', url=str(url.path), headers=headers)
+            connection.request(method='GET', url=url.to_str_no_proto(),
+                               headers=headers)
         elif Method.POST == method:
-            connection.request(method='POST', url=str(url.path),
+            connection.request(method='POST', url=url.to_str_no_proto(),
                                headers=headers, body=body)
         else:
             raise BackblazeB2Error("Invalid HTTP method value (" + str(method)
