@@ -62,9 +62,19 @@ def get_upload_url(api_url, auth_token, bucket_id):
         msg = "HTTP response status wasn't OK(200). " + str(response)
         raise BackblazeB2Error(msg)
 
-    json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
-    return (json_body["bucketId"], json_body["uploadUrl"],
-            json_body["authorizationToken"])
+    try:
+        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
+        ret_val = dict()
+        ret_val["bucket_id"] = json_body["bucketId"]
+        ret_val["upload_url"] = json_body["uploadUrl"]
+        ret_val["upload_auth_token"] = json_body["authorizationToken"]
+        return ret_val
+    except json.JSONDecodeError as e:
+        msg = "Malformed JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+    except KeyError as e:
+        msg = "Failed to find key in JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
 
 def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
                 src_file_sha1=None):
