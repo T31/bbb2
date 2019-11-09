@@ -4,6 +4,10 @@ class Protocol(enum.Enum):
     HTTP = 0
     HTTPS = 1
 
+class Method(enum.Enum):
+    GET = 0
+    POST = 0
+
 class Domain:
     domain = []
 
