@@ -146,5 +146,30 @@ def list_buckets(api_url, auth_token, account_id, bucket_name=None):
         msg = "Failed to find key in JSON response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
-if "__main__" == __name__:
-    authorize("asdf", "asdf")
+def start_large_file(api_url, auth_token, bucket_id, dst_file_name):
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = Path(["b2api", API_VERSION, "b2_start_large_file"])
+
+    headers = {"Authorization" : auth_token}
+
+    body = {"bucketId" : bucket_id,
+            "fileName" : dst_file_name,
+            "contentType" : "application/octet-stream"}
+    body = json.dumps(body)
+
+    response = util.http.send_request(local_api_url, util.http.Protocol.POST,
+                                      headers, body)
+
+    if http.HTTPStatus.OK != response.status_code:
+        msg = "HTTP response status wasn't OK(200). " + str(response)
+        raise BackblazeB2Error(msg)
+
+    try:
+        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
+        return json_body["fileId"]
+    except json.JSONDecodeError as e:
+        msg = "Malformed JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+    except KeyError as e:
+        msg = "Failed to find key in JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
