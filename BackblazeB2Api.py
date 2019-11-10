@@ -1,7 +1,8 @@
 import base64
 import copy
-import json
 import http
+import hashlib
+import json
 
 from BackblazeB2Error import BackblazeB2Error
 import util.http
@@ -193,6 +194,33 @@ def get_upload_part_url(api_url, auth_token, file_id):
                    "upload_part_auth_token" : json_body["authorizationToken"],
                    "file_id" : json_body["fileId"]}
         return ret_val
+    except json.JSONDecodeError as e:
+        msg = "Malformed JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+    except KeyError as e:
+        msg = "Failed to find key in JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+
+def upload_part(upload_url, auth_token, part_num, part):
+    hasher = hashlib.sha1()
+    hasher.update(part)
+
+    headers = {"Authorization" : auth_token,
+               "X-Bz-Part-Number" : str(part_num),
+               "Content-Length" : str(len(part)),
+               "X-Bz-Content-Sha1" : hasher.hexdigest()}
+    body = part
+
+    response = util.http.send_request(upload_url, util.http.Protocol.POST,
+                                      headers, body)
+
+    if http.HTTPStatus.OK != response.status_code:
+        msg = "HTTP response status wasn't OK(200). " + str(response)
+        raise BackblazeB2Error(msg)
+
+    try:
+        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
+        return json_body["partNumber"]
     except json.JSONDecodeError as e:
         msg = "Malformed JSON response. " + str(response)
         raise BackblazeB2Error(msg) from e
