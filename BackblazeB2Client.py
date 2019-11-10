@@ -1,8 +1,8 @@
 import copy
 
 import BackblazeB2Api
-import BackblazeB2ClientUtil
 from BackblazeB2Error import BackblazeB2Error
+import util.client
 import util.http
 
 class BackblazeB2Client:
@@ -20,7 +20,7 @@ class BackblazeB2Client:
         temp_key_id = copy.deepcopy(key_id)
         temp_application_key = copy.deepcopy(application_key)
         if (None == key_id) or (None == application_key):
-            cred_pair = BackblazeB2ClientUtil.get_cred_from_default_file()
+            cred_pair = util.client.get_cred_from_default_file()
             temp_key_id = cred_pair[0]
             temp_application_key = cred_pair[1]
 
@@ -53,10 +53,10 @@ class BackblazeB2Client:
                                            self.account_id, bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
-        bucket_id = BackblazeB2ClientUtil.get_bucket_id_from_name(self.api_url,
-                                                                  self.auth_token,
-                                                                  self.account_id,
-                                                                  bucket_name)
+        bucket_id = util.client.get_bucket_id_from_name(self.api_url,
+                                                        self.auth_token,
+                                                        self.account_id,
+                                                        bucket_name)
         if None == bucket_id:
             raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
                                    + "\".")
