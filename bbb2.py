@@ -38,7 +38,6 @@ if "__main__" == __name__:
 
             client = BackblazeB2Client()
             client.authorize()
-            results = client.upload_file(bucket_name, dst_file_name,
-                                         src_file_path)
+            client.upload_file(bucket_name, dst_file_name, src_file_path)
     except BackblazeB2Error as e:
         traceback.print_exc()

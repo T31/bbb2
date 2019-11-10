@@ -134,7 +134,6 @@ def send_request(url, method, headers, body):
     else:
         raise BackblazeB2Error("Invalid protocol value in URL ("
                                + str(url.protocol) + ")")
-
     try:
         if Method.GET == method:
             connection.request(method='GET', url=str(url), headers=headers)

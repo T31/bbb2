@@ -5,6 +5,7 @@ import hashlib
 import json
 
 from BackblazeB2Error import BackblazeB2Error
+import util.api
 import util.http
 import util.util
 
@@ -22,18 +23,18 @@ def authorize(key_id, application_key):
 
     headers = {"Authorization" : auth}
 
-    response = util.http.send_request(AUTH_URL, util.http.Method.GET, headers,
-                                      None)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status was not OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
-
+    response = util.api.send_request(AUTH_URL, util.http.Method.GET, headers,
+                                     None)
     try:
-        return json.loads(str(object=response.resp_body, encoding='utf-8'))
-    except json.JSONDecodeError as e:
-        msg = ("HTTP response JSON parse failed. " + str(response))
-        raise BackblazeB2Error(msg)
+        return {"account_id" : response["accountId"],
+                "auth_token" : response["authorizationToken"],
+                "api_url" : response["apiUrl"],
+                "download_url" : response["downloadUrl"],
+                "min_part_size_bytes" : response["absoluteMinimumPartSize"],
+                "rec_part_size_bytes" : response["recommendedPartSize"]}
+    except KeyError as e:
+        msg = "Response missing key."
+        raise BackblazeB2Error(msg) from e
 
 def cancel_large_file(api_url, auth_token, file_id):
     headers = dict()
@@ -43,12 +44,8 @@ def cancel_large_file(api_url, auth_token, file_id):
     body["fileId"] = file_id
     body = json.dumps(body)
 
-    response = util.http.send_request(api_url, util.http.Method.POST, headers,
-                                      body)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status wasn't OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
+    response = util.api.send_request(api_url, util.http.Method.POST, headers,
+                                     body)
 
 def get_upload_url(api_url, auth_token, bucket_id):
     local_api_url = copy.deepcopy(api_url)
@@ -57,25 +54,14 @@ def get_upload_url(api_url, auth_token, bucket_id):
 
     headers = {"Authorization" : auth_token}
     body = json.dumps({"bucketId" : bucket_id})
-    response = util.http.send_request(local_api_url, util.http.Method.POST,
-                                      headers, body)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status wasn't OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
-
+    response = util.api.send_request(local_api_url, util.http.Method.POST,
+                                     headers, body)
     try:
-        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
-        ret_val = dict()
-        ret_val["bucket_id"] = json_body["bucketId"]
-        ret_val["upload_url"] = json_body["uploadUrl"]
-        ret_val["upload_auth_token"] = json_body["authorizationToken"]
-        return ret_val
-    except json.JSONDecodeError as e:
-        msg = "Malformed JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return {"bucket_id" : response["bucketId"],
+                "upload_url" : response["uploadUrl"],
+                "upload_auth_token" : response["authorizationToken"]}
     except KeyError as e:
-        msg = "Failed to find key in JSON response. " + str(response)
+        msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
 def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
@@ -93,26 +79,15 @@ def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
 
     body = util.util.get_entire_file(src_file_path)
 
-    response = util.http.send_request(upload_url, util.http.Method.POST,
-                                      headers, body)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status wasn't OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
-
+    response = util.api.send_request(upload_url, util.http.Method.POST,
+                                     headers, body)
     try:
-        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
-        ret_val = dict()
-        ret_val["bucket_id"] = json_body["bucketId"]
-        ret_val["hash_sha1"] = json_body["contentSha1"]
-        ret_val["file_id"] = json_body["fileId"]
-        ret_val["file_name"] = json_body["fileName"]
-        return ret_val
-    except json.JSONDecodeError as e:
-        msg = "Malformed JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return {"bucket_id" : response["bucketId"],
+                "hash_sha1" : response["contentSha1"],
+                "file_id" : response["fileId"],
+                "file_name" : response["fileName"]}
     except KeyError as e:
-        msg = "Failed to find key in JSON response. " + str(response)
+        msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
 def list_buckets(api_url, auth_token, account_id, bucket_name=None):
@@ -127,24 +102,15 @@ def list_buckets(api_url, auth_token, account_id, bucket_name=None):
         body["bucketName"] = bucket_name
     body = json.dumps(body)
 
-    response = util.http.send_request(local_api_url, util.http.Method.POST,
-                                      headers, body)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status wasn't OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
-
+    response = util.api.send_request(local_api_url, util.http.Method.POST,
+                                     headers, body)
     try:
-        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
         ret_val = []
-        for bucket in json_body["buckets"]:
+        for bucket in response["buckets"]:
             ret_val.append((bucket["bucketName"], bucket["bucketId"]))
         return ret_val
-    except json.JSONDecodeError as e:
-        msg = "Malformed JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
     except KeyError as e:
-        msg = "Failed to find key in JSON response. " + str(response)
+        msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
 def start_large_file(api_url, auth_token, bucket_id, dst_file_name):
@@ -158,21 +124,12 @@ def start_large_file(api_url, auth_token, bucket_id, dst_file_name):
             "contentType" : "application/octet-stream"}
     body = json.dumps(body)
 
-    response = util.http.send_request(local_api_url, util.http.Protocol.POST,
-                                      headers, body)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status wasn't OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
-
+    response = util.api.send_request(local_api_url, util.http.Protocol.POST,
+                                     headers, body)
     try:
-        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
-        return json_body["fileId"]
-    except json.JSONDecodeError as e:
-        msg = "Malformed JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return response["fileId"]
     except KeyError as e:
-        msg = "Failed to find key in JSON response. " + str(response)
+        msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
 def get_upload_part_url(api_url, auth_token, file_id):
@@ -181,22 +138,12 @@ def get_upload_part_url(api_url, auth_token, file_id):
 
     headers = {"Authorization" : auth_token}
     body = json.dumps({"fileId" : file_id})
-    response = util.http.send_request(local_api_url, util.http.Protocol.POST,
-                                      headers, body)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status wasn't OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
-
+    response = util.api.send_request(local_api_url, util.http.Protocol.POST,
+                                     headers, body)
     try:
-        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
-        ret_val = {"upload_part_url" : json_body["uploadUrl"],
-                   "upload_part_auth_token" : json_body["authorizationToken"],
-                   "file_id" : json_body["fileId"]}
-        return ret_val
-    except json.JSONDecodeError as e:
-        msg = "Malformed JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return {"upload_part_url" : json_body["uploadUrl"],
+                "upload_part_auth_token" : json_body["authorizationToken"],
+                "file_id" : json_body["fileId"]}
     except KeyError as e:
         msg = "Failed to find key in JSON response. " + str(response)
         raise BackblazeB2Error(msg) from e
@@ -211,19 +158,10 @@ def upload_part(upload_url, auth_token, part_num, part):
                "X-Bz-Content-Sha1" : hasher.hexdigest()}
     body = part
 
-    response = util.http.send_request(upload_url, util.http.Protocol.POST,
-                                      headers, body)
-
-    if http.HTTPStatus.OK != response.status_code:
-        msg = "HTTP response status wasn't OK(200). " + str(response)
-        raise BackblazeB2Error(msg)
-
+    response = util.api.send_request(upload_url, util.http.Protocol.POST,
+                                     headers, body)
     try:
-        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
-        return json_body["partNumber"]
-    except json.JSONDecodeError as e:
-        msg = "Malformed JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return response["partNumber"]
     except KeyError as e:
         msg = "Failed to find key in JSON response. " + str(response)
         raise BackblazeB2Error(msg) from e
