@@ -4,10 +4,10 @@ import os.path
 def get_file_len_bytes(file_path):
     file_size = None
     try:
-        return os.path.getsize(src_file_path)
+        return os.path.getsize(file_path)
     except OSError as e:
         msg = ("Failed to get file size."
-               " SrcFilePath=\"" + str(src_file_path) + "\".")
+               " SrcFilePath=\"" + str(file_path) + "\".")
         raise BackblazeB2Error(msg) from e
 
 def calc_sha1(file_path):

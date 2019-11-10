@@ -51,3 +51,30 @@ class BackblazeB2Client:
     def list_buckets(self, bucket_name=None):
         return BackblazeB2Api.list_buckets(self.api_url, self.auth_token,
                                            self.account_id, bucket_name)
+
+    def upload_file(self, bucket_name, dst_file_name, src_file_path):
+        bucket_id = BackblazeB2ClientUtil.get_bucket_id_from_name(self.api_url,
+                                                                  self.auth_token,
+                                                                  self.account_id,
+                                                                  bucket_name)
+        if None == bucket_id:
+            raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
+                                   + "\".")
+
+        vals = BackblazeB2Api.get_upload_url(self.api_url, self.auth_token,
+                                             bucket_id)
+
+        upload_url = util.http.Url(util.http.Protocol.HTTPS, [], [])
+        upload_url.from_string(vals["upload_url"])
+
+        upload_auth_token = vals["upload_auth_token"]
+
+        results = BackblazeB2Api.upload_file(upload_url, upload_auth_token,
+                                             dst_file_name, src_file_path)
+        msg = "File upload complete."
+        msg += " SrcFilePath=\"" + str(src_file_path) + "\""
+        msg += ", DstFileName=\"" + results["file_name"] + "\""
+        msg += ", FileId=\"" + results["file_id"] + "\""
+        msg += ", BucketId=\"" + results["bucket_id"] + "\""
+        msg += ", FileHashSha1=\"" + results["hash_sha1"] + "\"."
+        print(msg)

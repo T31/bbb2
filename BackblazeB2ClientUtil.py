@@ -31,3 +31,12 @@ def get_cred_from_default_file():
         raise BackblazeB2Error(msg) from e
     finally:
         cred_file.close()
+
+def get_bucket_id_from_name(api_url, auth_token, account_id, bucket_name):
+    buckets = BackblazeB2Api.list_buckets(api_url, auth_token, account_id,
+                                          bucket_name)
+    for bucket in buckets:
+        if bucket_name == bucket[0]:
+            return bucket[1]
+
+    return None

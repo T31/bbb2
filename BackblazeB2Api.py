@@ -50,14 +50,14 @@ def cancel_large_file(api_url, auth_token, file_id):
         raise BackblazeB2Error(msg)
 
 def get_upload_url(api_url, auth_token, bucket_id):
-    headers = dict()
-    headers["Authorization"] = auth_token
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_get_upload_url"])
 
-    body = dict()
-    body["bucketId"] = bucket_id
-
-    response = util.http.send_request(api_url, util.http.Method.POST, headers,
-                                      body)
+    headers = {"Authorization" : auth_token}
+    body = json.dumps({"bucketId" : bucket_id})
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
 
     if http.HTTPStatus.OK != response.status_code:
         msg = "HTTP response status wasn't OK(200). " + str(response)
@@ -79,11 +79,12 @@ def get_upload_url(api_url, auth_token, bucket_id):
 
 def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
                 src_file_sha1=None):
-    headers = dict()
-    headers["Authorization"] = upload_auth_token
-    headers["X-Bz-File-Name"] = dst_file_name
-    headers["Content-Type"] = "application/octet-stream"
-    headers["Content-Length"] = util.util.get_file_len(src_file_path)
+    file_len = str(util.util.get_file_len_bytes(src_file_path))
+
+    headers = {"Authorization" : upload_auth_token,
+               "X-Bz-File-Name" : dst_file_name,
+               "Content-Type" : "application/octet-stream",
+               "Content-Length" : file_len}
     if None != src_file_sha1:
         headers["X-Bz-Content-Sha1"] = src_file_sha1
     else:
@@ -115,7 +116,8 @@ def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
 
 def list_buckets(api_url, auth_token, account_id, bucket_name=None):
     local_api_url = copy.deepcopy(api_url)
-    local_api_url.path = util.http.Path(["b2api", API_VERSION, "b2_list_buckets"])
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_list_buckets"])
 
     headers = {"Authorization" : auth_token}
 
