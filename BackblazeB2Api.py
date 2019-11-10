@@ -1,4 +1,6 @@
 import base64
+import copy
+import json
 import http
 
 from BackblazeB2Error import BackblazeB2Error
@@ -6,19 +8,18 @@ import util.http
 import util.util
 
 API_VERSION = "v2"
-AUTH_URL = util.http.Url(util.http.Protocol.HTTP,
+AUTH_URL = util.http.Url(util.http.Protocol.HTTPS,
                          util.http.Domain(["api", "backblazeb2", "com"]),
                          util.http.Path(["b2api", API_VERSION,
                                          "b2_authorize_account"]))
 
-def authorize(account_id, application_id):
-    auth = account_id + ":" + application_id
+def authorize(key_id, application_key):
+    auth = key_id + ":" + application_key
     auth = auth.encode(encoding='utf-8')
     auth = base64.b64encode(auth)
     auth = "Basic" + str(object=auth, encoding='utf-8')
 
-    headers = dict()
-    headers["Authorization"] = auth
+    headers = {"Authorization" : auth}
 
     response = util.http.send_request(AUTH_URL, util.http.Method.GET, headers,
                                       None)
@@ -104,6 +105,37 @@ def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
         ret_val["hash_sha1"] = json_body["contentSha1"]
         ret_val["file_id"] = json_body["fileId"]
         ret_val["file_name"] = json_body["fileName"]
+        return ret_val
+    except json.JSONDecodeError as e:
+        msg = "Malformed JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+    except KeyError as e:
+        msg = "Failed to find key in JSON response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+
+def list_buckets(api_url, auth_token, account_id, bucket_name=None):
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION, "b2_list_buckets"])
+
+    headers = {"Authorization" : auth_token}
+
+    body = {"accountId" : account_id}
+    if None != bucket_name:
+        body["bucketName"] = bucket_name
+    body = json.dumps(body)
+
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+
+    if http.HTTPStatus.OK != response.status_code:
+        msg = "HTTP response status wasn't OK(200). " + str(response)
+        raise BackblazeB2Error(msg)
+
+    try:
+        json_body = json.loads(str(object=response.resp_body, encoding='utf-8'))
+        ret_val = []
+        for bucket in json_body["buckets"]:
+            ret_val.append((bucket["bucketName"], bucket["bucketId"]))
         return ret_val
     except json.JSONDecodeError as e:
         msg = "Malformed JSON response. " + str(response)

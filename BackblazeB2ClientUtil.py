@@ -1,9 +1,11 @@
 import json
+import os
 import pathlib
 
 import BackblazeB2Api
+from BackblazeB2Error import BackblazeB2Error
 
-def get_cred_from_default_file(self):
+def get_cred_from_default_file():
     cred_file_path = pathlib.Path.home() / ".bbb2_cred.json"
 
     cred_file = None
@@ -17,8 +19,8 @@ def get_cred_from_default_file(self):
 
     try:
         cred_file_contents = json.load(cred_file)
-        return (cred_file_contents["accountId"],
-                cred_file_contents["applicationId"])
+        return (cred_file_contents["keyId"],
+                cred_file_contents["applicationKey"])
     except json.JSONDecodeError as e:
         msg = ("Failed to parse credential file."
                + " CredFilePath=\"" + str(cred_file_path) + "\".")
