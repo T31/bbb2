@@ -13,9 +13,12 @@ if "__main__" == __name__:
         if sys.argv[1] == "--list-buckets":
             client = BackblazeB2Client()
             client.authorize()
-            results = client.list_buckets()
 
-            for bucket in results:
+            specific_bucket = None
+            if len(sys.argv) > 2:
+                specific_bucket = sys.argv[2]
+
+            for bucket in client.list_buckets(specific_bucket):
                 print("[BucketName=" + bucket[0]
                       + ", BucketId=" + bucket[1] + "]")
     except BackblazeB2Error as e:
