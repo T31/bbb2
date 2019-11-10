@@ -137,11 +137,10 @@ def send_request(url, method, headers, body):
 
     try:
         if Method.GET == method:
-            connection.request(method='GET', url=url.to_str_no_proto(),
-                               headers=headers)
+            connection.request(method='GET', url=str(url), headers=headers)
         elif Method.POST == method:
-            connection.request(method='POST', url=url.to_str_no_proto(),
-                               headers=headers, body=body)
+            connection.request(method='POST', url=str(url), headers=headers,
+                               body=body)
         else:
             raise BackblazeB2Error("Invalid HTTP method value (" + str(method)
                                    + ")")
