@@ -1,6 +1,7 @@
 import enum
 import http.client
 
+from BackblazeB2Error import BackblazeB2ConnectError
 from BackblazeB2Error import BackblazeB2Error
 
 class Protocol(enum.Enum):
@@ -141,8 +142,8 @@ def send_request(url, method, headers, body):
             connection.request(method='POST', url=str(url), headers=headers,
                                body=body)
         else:
-            raise BackblazeB2Error("Invalid HTTP method value (" + str(method)
-                                   + ")")
+            raise BackblazeB2Error("Invalid HTTP method value"
+                                   + " (" + str(method) + ")")
 
         response = connection.getresponse()
         return Response(url, headers, body, response.status,
@@ -152,7 +153,7 @@ def send_request(url, method, headers, body):
         msg += ", method=\"" + str(method) + "\""
         msg += ", req_headers=\"" + str(headers) + "\""
         msg += ", req_body=\"" + str(body) + "\"."
-        raise BackblazeB2Error(msg) from e
+        raise BackblazeB2ConnectError(msg) from e
     finally:
         connection.close()
 

@@ -2,8 +2,10 @@ import copy
 
 import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2Error
+from BackblazeB2Error import BackblazeB2ExpiredAuthError
 import util.client
 import util.http
+import util.util
 
 class BackblazeB2Client:
     account_id = None
@@ -13,8 +15,10 @@ class BackblazeB2Client:
     min_upload_part_bytes = None
     recommended_upload_part_bytes = None
 
-    upload_auth_token = None
-    upload_url = None
+    TERABYTE = 1099511627776
+    MAX_FILE_BYTES = 10 * TERABYTE
+
+    MAX_UPLOAD_PARTS = 10000
 
     def authorize(self, key_id=None, application_key=None):
         temp_key_id = copy.deepcopy(key_id)
@@ -42,28 +46,31 @@ class BackblazeB2Client:
                                            self.account_id, bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
-        bucket_id = util.client.get_bucket_id_from_name(self.api_url,
-                                                        self.auth_token,
-                                                        self.account_id,
-                                                        bucket_name)
-        if None == bucket_id:
-            raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
-                                   + "\".")
+        if util.util.get_file_len_bytes(src_file_path) > self.MAX_FILE_BYTES:
+            raise BackblazeB2Error("File \"" + str(src_file_path) + "\""
+                                   + " exceeds max file bytes "
+                                   + str(self.MAX_FILE_BYTES) + ".")
 
-        vals = BackblazeB2Api.get_upload_url(self.api_url, self.auth_token,
-                                             bucket_id)
+        if (util.util.get_file_len_bytes(src_file_path)
+            <= self.recommended_upload_part_bytes):
 
-        upload_url = util.http.Url(util.http.Protocol.HTTPS, [], [])
-        upload_url.from_string(vals["upload_url"])
+            util.client.upload_file_small(bucket_name, dst_file_name,
+                                          src_file_path)
+            return
 
-        upload_auth_token = vals["upload_auth_token"]
+        part_len = self.recommended_upload_part_bytes
+        file_len = util.util.get_file_len_bytes(src_file_path)
+        if (file_len > (self.recommended_upload_part_bytes
+                        * self.MAX_UPLOAD_PARTS)):
+            part_len = file_len // (self.MAX_UPLOAD_PARTS - 1)
 
-        results = BackblazeB2Api.upload_file(upload_url, upload_auth_token,
-                                             dst_file_name, src_file_path)
-        msg = "File upload complete."
-        msg += " SrcFilePath=\"" + str(src_file_path) + "\""
-        msg += ", DstFileName=\"" + results["file_name"] + "\""
-        msg += ", FileId=\"" + results["file_id"] + "\""
-        msg += ", BucketId=\"" + results["bucket_id"] + "\""
-        msg += ", FileHashSha1=\"" + results["hash_sha1"] + "\"."
-        print(msg)
+        file_id = util.client.start_large_file(self.api_url, self.auth_token,
+                                               bucket_name, dst_file_name)
+        while True:
+            try:
+                return util.client.upload_file_big(self.api_url,
+                                                   self.auth_token, bucket_name,
+                                                   dst_file_name,
+                                                   src_file_path, part_len)
+            except BackblazeB2ExpiredAuthError as e:
+                self.authorize()

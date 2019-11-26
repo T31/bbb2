@@ -40,3 +40,28 @@ def get_entire_file(file_path):
         return file_stream.read()
     finally:
         file_stream.close()
+
+def open_binary_read_file(file_path, mode):
+    try:
+        return open(file=file_path, mode=mode)
+    except OSError as e:
+        msg = "Unable to open file \"" + src_file_path + "\"."
+        raise BackblazeB2Error(msg) from e
+
+def read_file_chunk(read_file, read_len):
+    if 0 == read_len:
+        return bytearray()
+
+    ret_val = bytearray()
+    bytes_left = read_len
+    while bytes_left > 0:
+        temp = read_file.read(bytes_left)
+        if len(temp) == 0:
+            return ret_val
+        elif None == temp:
+            continue
+
+        bytes_left -= len(temp)
+        ret_val.append(temp)
+
+    return ret_val

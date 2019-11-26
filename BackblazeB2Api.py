@@ -161,7 +161,13 @@ def upload_part(upload_url, auth_token, part_num, part):
     response = util.api.send_request(upload_url, util.http.Protocol.POST,
                                      headers, body)
     try:
-        return response["partNumber"]
+        return {"part_number" : response["partNumber"],
+                "sha1_hash" : hasher.hexdigest()}
     except KeyError as e:
         msg = "Failed to find key in JSON response. " + str(response)
         raise BackblazeB2Error(msg) from e
+
+def finish_large_file(api_url, auth_token, file_id, sha1_part_hashes):
+    headers = {"Authorization" : auth_token}
+    body = json.dumps({"fileId" : file_id, "partSha1Array" : sha1_part_hashes})
+    util.api.send_request(api_url, util.http.Method.POST, headers, body)
