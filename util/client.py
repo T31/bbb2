@@ -77,25 +77,21 @@ def start_large_file(api_url, auth_token, bucket_name, dst_file_name):
     return BackblazeB2Api.start_large_file(api_url, auth_token, bucket_id,
                                            dst_file_name)
 
-def resume_upload_file_big(api_url, auth_token, file_id, src_file_path,
-                           part_len, part_hashes, part_num):
+def upload_file_big(src_file_path, api_url, auth_token, file_id, part_len,
+                    part_hashes):
     src_file = util.util.open_binary_read_file(src_file_path)
+    src_file.seek(part_len * len(part_hashes))
 
     results = BackblazeB2Api.get_upload_part_url(api_url, auth_token, file_id)
     upload_url = results["upload_part_url"]
     upload_auth_token = results["upload_part_auth_token"]
 
-    allowed_connect_failures = 5
-    allowed_auth_failures = 1
-
-    part_num = 1
     part = util.util.read_file_chunk(src_file, part_len)
     while len(part) > 0:
         try:
             result = BackblazeB2Api.upload_part(upload_url,
-                                                upload_auth_token, part_num,
-                                                part)
-            part_num += 1
+                                                upload_auth_token,
+                                                len(part_hashes) + 1, part)
             part_hashes.append(result["sha1_hash"])
             part = util.util.read_file_chunk(src_file, part_len)
         except BackblazeB2ExpiredAuthError as e:
@@ -104,15 +100,10 @@ def resume_upload_file_big(api_url, auth_token, file_id, src_file_path,
             upload_url = results["upload_part_url"]
             upload_auth_token = results["upload_part_auth_token"]
         except BackblazeB2ConnectError as e:
-            if (0 >= allowed_connect_failures):
-                results = BackblazeB2Api.get_upload_part_url(api_url,
-                                                             auth_token,
-                                                             file_id)
-                upload_url = results["upload_part_url"]
-                upload_auth_token = results["upload_part_auth_token"]
-            allowed_connect_failures -= 1
-    try:
-        BackblazeB2Api.finish_large_file(self.api_url, self.auth_token, file_id
-                                         part_hashes)
-    except BackblazeB2ExpiredAuthError as e:
-        pass # reauth account
+            results = BackblazeB2Api.get_upload_part_url(api_url, auth_token,
+                                                         file_id)
+            upload_url = results["upload_part_url"]
+            upload_auth_token = results["upload_part_auth_token"]
+
+    BackblazeB2Api.finish_large_file(self.api_url, self.auth_token, file_id,
+                                     part_hashes)
