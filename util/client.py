@@ -79,6 +79,8 @@ def start_large_file(api_url, auth_token, bucket_name, dst_file_name):
 
 def upload_file_big(src_file_path, api_url, auth_token, file_id, part_len,
                     part_hashes):
+    file_len = util.util.get_file_len_bytes(src_file_path)
+
     src_file = util.util.open_binary_read_file(src_file_path)
     src_file.seek(part_len * len(part_hashes))
 
@@ -93,6 +95,11 @@ def upload_file_big(src_file_path, api_url, auth_token, file_id, part_len,
                                                 upload_auth_token,
                                                 len(part_hashes) + 1, part)
             part_hashes.append(result["sha1_hash"])
+
+            percent = str((part_len * len(part_hashes)) / file_len) + "%"
+            fraction = str(part_len * len(part_hashes)) + "/" + str(file_len)
+            print("Part uploaded. " + fraction + " (" + percent + ").")
+
             part = util.util.read_file_chunk(src_file, part_len)
         except BackblazeB2ExpiredAuthError as e:
             results = BackblazeB2Api.get_upload_part_url(api_url, auth_token,
