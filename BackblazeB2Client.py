@@ -38,8 +38,16 @@ class BackblazeB2Client:
         self.min_upload_part_bytes = response["min_part_size_bytes"]
         self.recommended_upload_part_bytes = response["rec_part_size_bytes"]
 
+    def cancel_all_large_files(self):
+        for (bucket_name, bucket_id) in self.list_buckets():
+            for file_id in BackblazeB2Api.list_unfinished_large_files(self.api_url,
+                                                                      self.auth_token,
+                                                                      bucket_id):
+                self.cancel_large_file(file_id)
+
     def cancel_large_file(self, file_id):
-        BackblazeB2Api.cancel_large_file(api_url, auth_token, file_id)
+        BackblazeB2Api.cancel_large_file(self.api_url, self.auth_token, file_id)
+        print("Cancelled large file ID " + str(file_id))
 
     def list_buckets(self, bucket_name=None):
         return BackblazeB2Api.list_buckets(self.api_url, self.auth_token,
