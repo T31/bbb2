@@ -115,7 +115,8 @@ def list_buckets(api_url, auth_token, account_id, bucket_name=None):
 
 def start_large_file(api_url, auth_token, bucket_id, dst_file_name):
     local_api_url = copy.deepcopy(api_url)
-    local_api_url.path = Path(["b2api", API_VERSION, "b2_start_large_file"])
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_start_large_file"])
 
     headers = {"Authorization" : auth_token}
 
@@ -124,7 +125,7 @@ def start_large_file(api_url, auth_token, bucket_id, dst_file_name):
             "contentType" : "application/octet-stream"}
     body = json.dumps(body)
 
-    response = util.api.send_request(local_api_url, util.http.Protocol.POST,
+    response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
     try:
         return response["fileId"]
@@ -134,16 +135,17 @@ def start_large_file(api_url, auth_token, bucket_id, dst_file_name):
 
 def get_upload_part_url(api_url, auth_token, file_id):
     local_api_url = copy.deepcopy(api_url)
-    local_api_url.path = Path(["b2api", API_VERSION, "b2_get_upload_part_url"])
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_get_upload_part_url"])
 
     headers = {"Authorization" : auth_token}
     body = json.dumps({"fileId" : file_id})
-    response = util.api.send_request(local_api_url, util.http.Protocol.POST,
+    response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
     try:
-        return {"upload_part_url" : json_body["uploadUrl"],
-                "upload_part_auth_token" : json_body["authorizationToken"],
-                "file_id" : json_body["fileId"]}
+        return {"upload_part_url" : response["uploadUrl"],
+                "upload_part_auth_token" : response["authorizationToken"],
+                "file_id" : response["fileId"]}
     except KeyError as e:
         msg = "Failed to find key in JSON response. " + str(response)
         raise BackblazeB2Error(msg) from e
@@ -158,8 +160,8 @@ def upload_part(upload_url, auth_token, part_num, part):
                "X-Bz-Content-Sha1" : hasher.hexdigest()}
     body = part
 
-    response = util.api.send_request(upload_url, util.http.Protocol.POST,
-                                     headers, body)
+    response = util.api.send_request(upload_url, util.http.Method.POST, headers,
+                                     body)
     try:
         return {"part_number" : response["partNumber"],
                 "sha1_hash" : hasher.hexdigest()}
@@ -168,6 +170,9 @@ def upload_part(upload_url, auth_token, part_num, part):
         raise BackblazeB2Error(msg) from e
 
 def finish_large_file(api_url, auth_token, file_id, sha1_part_hashes):
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_finish_large_file"])
     headers = {"Authorization" : auth_token}
     body = json.dumps({"fileId" : file_id, "partSha1Array" : sha1_part_hashes})
-    util.api.send_request(api_url, util.http.Method.POST, headers, body)
+    util.api.send_request(local_api_url, util.http.Method.POST, headers, body)

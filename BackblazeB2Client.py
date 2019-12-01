@@ -48,7 +48,7 @@ class BackblazeB2Client:
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
         file_len = util.util.get_file_len_bytes(src_file_path)
         print("Uploading file \"" + str(src_file_path) + "\"."
-              + "FileLen=" + str(file_len) + ".")
+              + " FileLen=" + str(file_len) + ".")
 
         if file_len > self.MAX_FILE_BYTES:
             raise BackblazeB2Error("File \"" + str(src_file_path) + "\""
@@ -68,7 +68,8 @@ class BackblazeB2Client:
         print("Part length is " + str(part_len) + ".")
 
         file_id = util.client.start_large_file(self.api_url, self.auth_token,
-                                               bucket_name, dst_file_name)
+                                               self.account_id, bucket_name,
+                                               dst_file_name)
 
         print("Upload file ID is " + str(file_id) + ".")
 
