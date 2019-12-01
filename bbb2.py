@@ -22,7 +22,7 @@ if "__main__" == __name__:
                 print("[BucketName=" + bucket[0]
                       + ", BucketId=" + bucket[1] + "]")
 
-        if sys.argv[1] == "--upload-file":
+        elif sys.argv[1] == "--upload-file":
             if len(sys.argv) < 5:
                 print("Please provide a bucket name, destination file name"
                       + ", and a source file path.")

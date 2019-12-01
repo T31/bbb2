@@ -17,7 +17,7 @@ def send_request(url, method, headers, body):
             raise BackblazeB2Error(msg)
 
         return json_body
-    except JSONDecodeError as e:
+    except json.JSONDecodeError as e:
         msg = "Malformed JSON response. " + str(response)
         raise BackblazeB2Error(msg) from e
     except KeyError as e:
