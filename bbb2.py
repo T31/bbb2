@@ -39,5 +39,9 @@ if "__main__" == __name__:
             client = BackblazeB2Client()
             client.authorize()
             client.upload_file(bucket_name, dst_file_name, src_file_path)
+        elif sys.argv[1] == "--cancel-all-large-file-uploads":
+            client = BackblazeB2Client()
+            client.authorize()
+            client.cancel_all_large_files()
     except BackblazeB2Error as e:
         traceback.print_exc()

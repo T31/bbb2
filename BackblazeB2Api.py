@@ -37,15 +37,14 @@ def authorize(key_id, application_key):
         raise BackblazeB2Error(msg) from e
 
 def cancel_large_file(api_url, auth_token, file_id):
-    headers = dict()
-    headers["Authorization"] = auth_token
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_cancel_large_file"])
 
-    body = dict()
-    body["fileId"] = file_id
-    body = json.dumps(body)
-
-    response = util.api.send_request(api_url, util.http.Method.POST, headers,
-                                     body)
+    headers = {"Authorization" : auth_token}
+    body = json.dumps({"fileId" : file_id})
+    response = util.api.send_request(local_api_url, util.http.Method.POST,
+                                     headers, body)
 
 def get_upload_url(api_url, auth_token, bucket_id):
     local_api_url = copy.deepcopy(api_url)
@@ -176,3 +175,21 @@ def finish_large_file(api_url, auth_token, file_id, sha1_part_hashes):
     headers = {"Authorization" : auth_token}
     body = json.dumps({"fileId" : file_id, "partSha1Array" : sha1_part_hashes})
     util.api.send_request(local_api_url, util.http.Method.POST, headers, body)
+
+def list_unfinished_large_files(api_url, auth_token, bucket_id):
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_list_unfinished_large_files"])
+    headers = {"Authorization" : auth_token}
+    body = json.dumps({"bucketId" : bucket_id})
+
+    try:
+        response = util.api.send_request(local_api_url, util.http.Method.POST,
+                                         headers, body)
+        ret_val = []
+        for file in response["files"]:
+            ret_val.append(file["fileId"])
+        return ret_val
+    except KeyError as e:
+        msg = "Failed to find key in response. " + str(response)
+        raise BackblazeB2Error(msg) from e
