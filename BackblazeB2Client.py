@@ -88,4 +88,5 @@ class BackblazeB2Client:
                                                    self.auth_token, file_id,
                                                    part_len, part_hashes)
             except BackblazeB2ExpiredAuthError as e:
+                print("Reauthorizing.")
                 self.authorize()
