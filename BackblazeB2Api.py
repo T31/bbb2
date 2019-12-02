@@ -46,6 +46,21 @@ def cancel_large_file(api_url, auth_token, file_id):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
 
+def copy_file(api_url, auth_token, src_file_id, dst_file_name, dst_bucket=None):
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION, "b2_copy_file"])
+
+    headers = {"Authorization" : auth_token}
+
+    body = {"sourceFileId" : src_file_id,
+            "fileName" : dst_file_name}
+    if None != dst_bucket:
+        body["destinationBucketId"] = dst_bucket
+    body = json.dumps(body)
+
+    response = util.api.send_request(local_api_url, util.http.Method.POST,
+                                     headers, body)
+
 def get_upload_url(api_url, auth_token, bucket_id):
     local_api_url = copy.deepcopy(api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
