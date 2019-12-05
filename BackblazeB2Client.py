@@ -49,6 +49,15 @@ class BackblazeB2Client:
         BackblazeB2Api.cancel_large_file(self.api_url, self.auth_token, file_id)
         print("Cancelled large file ID " + str(file_id))
 
+    def copy_file(self, src_file_id, dst_bucket_name, dst_file_name):
+        dst_bucket_id = BackblazeB2Api.list_buckets(self.api_url,
+                                                    self.auth_token,
+                                                    self.account_id,
+                                                    dst_bucket_name)[0][1]
+
+        BackblazeB2Api.copy_file(self.api_url, self.auth_token, src_file_id,
+                                 dst_bucket_id, dst_file_name)
+
     def list_buckets(self, bucket_name=None):
         return BackblazeB2Api.list_buckets(self.api_url, self.auth_token,
                                            self.account_id, bucket_name)

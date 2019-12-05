@@ -43,5 +43,13 @@ if "__main__" == __name__:
             client = BackblazeB2Client()
             client.authorize()
             client.cancel_all_large_files()
+        elif sys.argv[1] == "--copy-file":
+            src_file_id = sys.argv[2]
+            dst_bucket_name = sys.argv[3]
+            dst_file_name = sys.argv[4]
+
+            client = BackblazeB2Client()
+            client.authorize()
+            client.copy_file(src_file_id, dst_bucket_name, dst_file_name)
     except BackblazeB2Error as e:
         traceback.print_exc()
