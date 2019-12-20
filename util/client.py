@@ -38,12 +38,11 @@ def get_cred_from_default_file():
 def get_bucket_id_from_name(api_url, auth_token, account_id, bucket_name):
     buckets = BackblazeB2Api.list_buckets(api_url, auth_token, account_id,
                                           bucket_name)
-    for bucket in buckets:
-        if bucket_name == bucket[0]:
-            return bucket[1]
-
-    raise BackblazeB2Error("No bucket ID found for bucket name \""
-                           + bucket_name + "\".")
+    try:
+        return buckets[bucket_name]
+    except KeyError as e:
+        raise BackblazeB2Error("No bucket ID found for bucket name \""
+                               + bucket_name + "\".") from e
 
 def upload_file_small(self, bucket_name, dst_file_name, src_file_path):
     bucket_id = util.client.get_bucket_id_from_name(self.api_url,
@@ -119,3 +118,17 @@ def upload_file_big(src_file_path, api_url, auth_token, file_id, part_len,
             upload_auth_token = results["upload_part_auth_token"]
 
     BackblazeB2Api.finish_large_file(api_url, auth_token, file_id, part_hashes)
+
+def get_file_info(api_url, auth_token, account_id, bucket_name, file_name):
+    bucket_id = util.client.get_bucket_id_from_name(api_url, auth_token,
+                                                    account_id, bucket_name)
+    bucket_files = BackblazeB2Api.list_file_names(api_url, auth_token,
+                                                  bucket_id)
+    try:
+        return bucket_files[file_name]
+    except KeyError as e:
+        msg = "Unable to get file info."
+        msg += " AccountID=\"" + str(account_id) + "\""
+        msg += ", bucketName=\"" + bucket_name + "\""
+        msg += ", fileName=\"" + file_name + "\"."
+        raise BackblazeB2Error(msg) from e

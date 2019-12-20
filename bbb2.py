@@ -51,5 +51,12 @@ if "__main__" == __name__:
             client = BackblazeB2Client()
             client.authorize()
             client.copy_file(src_file_id, dst_bucket_name, dst_file_name)
+        elif sys.argv[1] == "--download":
+            src_bucket_name = sys.argv[2]
+            src_file_name = sys.argv[3]
+            dst_file_path = sys.argv[4]
+            client = BackblazeB2Client()
+            client.authorize()
+            client.download_file(src_bucket_name, src_file_name, dst_file_path)
     except BackblazeB2Error as e:
         traceback.print_exc()

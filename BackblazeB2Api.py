@@ -61,6 +61,28 @@ def copy_file(api_url, auth_token, src_file_id, dst_bucket_id, dst_file_name):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
 
+def download_file_by_id(download_url, auth_token, file_id, start_idx_inc,
+                        end_idx_inc):
+    local_download_url = copy.deepcopy(download_url)
+    local_download_url.path = util.http.Path(["b2api", API_VERSION,
+                                              "b2_download_file_by_id?fileId=" + file_id])
+
+    range_str = "bytes=" + str(start_idx_inc) + "-" + str(end_idx_inc)
+    headers = {"Authorization" : auth_token, "Range" : range_str}
+    body = json.dumps({"fileId" : file_id})
+    return util.api.send_request(local_download_url, util.http.Method.POST,
+                                 headers, body, True)
+
+def download_file_by_name(download_url, auth_token, bucket_name, file_name,
+                          start_idx_inc, end_idx_inc):
+    local_download_url = copy.deepcopy(download_url)
+    local_download_url.path = util.http.Path(["file", bucket_name, file_name])
+
+    range_str = "bytes=" + str(start_idx_inc) + "-" + str(end_idx_inc)
+    headers = {"Authorization" : auth_token, "Range" : range_str}
+    return util.api.send_request(local_download_url, util.http.Method.GET,
+                                 headers, None, True)
+
 def get_upload_url(api_url, auth_token, bucket_id):
     local_api_url = copy.deepcopy(api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
@@ -119,9 +141,9 @@ def list_buckets(api_url, auth_token, account_id, bucket_name=None):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
     try:
-        ret_val = []
+        ret_val = dict()
         for bucket in response["buckets"]:
-            ret_val.append((bucket["bucketName"], bucket["bucketId"]))
+            ret_val[bucket["bucketName"]] = bucket["bucketId"]
         return ret_val
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)
@@ -204,6 +226,25 @@ def list_unfinished_large_files(api_url, auth_token, bucket_id):
         ret_val = []
         for file in response["files"]:
             ret_val.append(file["fileId"])
+        return ret_val
+    except KeyError as e:
+        msg = "Failed to find key in response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+
+def list_file_names(api_url, auth_token, bucket_id):
+    local_api_url = copy.deepcopy(api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION,
+                                         "b2_list_file_names"])
+    headers = {"Authorization" : auth_token}
+    body = json.dumps({"bucketId" : bucket_id})
+    try:
+        response = util.api.send_request(local_api_url, util.http.Method.POST,
+                                         headers, body)
+        ret_val = dict()
+        for file in response["files"]:
+            entry = {"contentLength" : file["contentLength"],
+                     "fileId" : file["fileId"]}
+            ret_val[file["fileName"]] = entry
         return ret_val
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)
