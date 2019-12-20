@@ -58,6 +58,36 @@ class BackblazeB2Client:
         BackblazeB2Api.copy_file(self.api_url, self.auth_token, src_file_id,
                                  dst_bucket_id, dst_file_name)
 
+    def download_file(self, src_bucket_name, src_file_name, dst_file_path):
+        src_file_info = util.client.get_file_info(self.api_url, self.auth_token,
+                                                  self.account_id,
+                                                  src_bucket_name,
+                                                  src_file_name)
+        src_file_id = src_file_info["fileId"]
+        src_file_len = src_file_info["contentLength"]
+        bytes_downloaded = 0
+        chunk_len = 10 * 1024 * 1024
+
+        try:
+            out_file = open(file=dst_file_path, mode='wb')
+
+            while bytes_downloaded < src_file_len:
+                start_idx_inc = bytes_downloaded
+                end_idx_inc = bytes_downloaded + chunk_len
+                if end_idx_inc > src_file_len:
+                    end_idx_inc = src_file_len - 1
+
+                data = BackblazeB2Api.download_file_by_id(self.download_url,
+                                                          self.auth_token,
+                                                          src_file_id,
+                                                          start_idx_inc,
+                                                          end_idx_inc)
+                out_file.write(data)
+                bytes_downloaded += len(data)
+                print("Bytes downloaded: " + str(bytes_downloaded))
+        finally:
+            out_file.close()
+
     def list_buckets(self, bucket_name=None):
         return BackblazeB2Api.list_buckets(self.api_url, self.auth_token,
                                            self.account_id, bucket_name)

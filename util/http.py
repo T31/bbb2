@@ -146,8 +146,9 @@ def send_request(url, method, headers, body):
                                    + " (" + str(method) + ")")
 
         response = connection.getresponse()
+        resp_body = response.read()
         return Response(url, headers, body, response.status,
-                        response.getheaders(), response.read())
+                        response.getheaders(), resp_body)
     except ConnectionResetError as e:
         msg = "Connection error during HTTP request. Url=\"" + str(url) + "\""
         msg += ", method=\"" + str(method) + "\""
