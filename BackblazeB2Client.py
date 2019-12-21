@@ -1,4 +1,5 @@
 import copy
+import os
 
 import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2Error
@@ -68,8 +69,13 @@ class BackblazeB2Client:
         bytes_downloaded = 0
         chunk_len = 10 * 1024 * 1024
 
+        out_file = None
         try:
-            out_file = open(file=dst_file_path, mode='wb')
+            if (os.path.exists(dst_file_path)):
+                out_file = open(file=dst_file_path, mode='ab')
+                bytes_downloaded = util.util.get_file_len_bytes(dst_file_path)
+            else:
+                out_file = open(file=dst_file_path, mode='wb')
 
             while bytes_downloaded < src_file_len:
                 start_idx_inc = bytes_downloaded
