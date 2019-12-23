@@ -1,6 +1,8 @@
 import hashlib
 import os.path
 
+from BackblazeB2Error import BackblazeB2Error
+
 def get_file_len_bytes(file_path):
     file_size = None
     try:
