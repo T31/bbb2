@@ -110,8 +110,9 @@ class BackblazeB2Client:
                                    + str(self.MAX_FILE_BYTES) + ".")
 
         if file_len <= self.recommended_upload_part_bytes:
-            util.client.upload_file_small(bucket_name, dst_file_name,
-                                          src_file_path)
+            util.client.upload_file_small(self.api_url, self.auth_token,
+                                          self.account_id, bucket_name,
+                                          dst_file_name, src_file_path)
             return
 
         part_len = self.recommended_upload_part_bytes

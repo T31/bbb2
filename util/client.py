@@ -44,17 +44,15 @@ def get_bucket_id_from_name(api_url, auth_token, account_id, bucket_name):
         raise BackblazeB2Error("No bucket ID found for bucket name \""
                                + bucket_name + "\".") from e
 
-def upload_file_small(self, bucket_name, dst_file_name, src_file_path):
-    bucket_id = util.client.get_bucket_id_from_name(self.api_url,
-                                                    self.auth_token,
-                                                    self.account_id,
-                                                    bucket_name)
+def upload_file_small(api_url, auth_token, account_id, bucket_name,
+                      dst_file_name, src_file_path):
+    bucket_id = util.client.get_bucket_id_from_name(api_url, auth_token,
+                                                    account_id, bucket_name)
     if None == bucket_id:
         raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
                                + "\".")
 
-    vals = BackblazeB2Api.get_upload_url(self.api_url, self.auth_token,
-                                         bucket_id)
+    vals = BackblazeB2Api.get_upload_url(api_url, auth_token, bucket_id)
 
     upload_url = util.http.Url(util.http.Protocol.HTTPS, [], [])
     upload_url.from_string(vals["upload_url"])
