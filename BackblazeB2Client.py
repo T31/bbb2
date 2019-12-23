@@ -1,4 +1,5 @@
 import copy
+import log
 import os
 
 import BackblazeB2Api
@@ -38,6 +39,8 @@ class BackblazeB2Client:
         self.download_url.from_string(response["download_url"])
         self.min_upload_part_bytes = response["min_part_size_bytes"]
         self.recommended_upload_part_bytes = response["rec_part_size_bytes"]
+
+        log.log_info("Authorized.")
 
     def cancel_all_large_files(self):
         buckets = self.list_buckets()
@@ -101,8 +104,8 @@ class BackblazeB2Client:
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
         file_len = util.util.get_file_len_bytes(src_file_path)
-        print("Uploading file \"" + str(src_file_path) + "\"."
-              + " FileLen=" + str(file_len) + ".")
+        log.log_info("Uploading file \"" + str(src_file_path) + "\"."
+                     + " FileLen=" + str(file_len) + ".")
 
         if file_len > self.MAX_FILE_BYTES:
             raise BackblazeB2Error("File \"" + str(src_file_path) + "\""
@@ -120,13 +123,13 @@ class BackblazeB2Client:
                         * self.MAX_UPLOAD_PARTS)):
             part_len = file_len // (self.MAX_UPLOAD_PARTS - 1)
 
-        print("Part length is " + str(part_len) + ".")
+        log.log_info("Part length is " + str(part_len) + ".")
 
         file_id = util.client.start_large_file(self.api_url, self.auth_token,
                                                self.account_id, bucket_name,
                                                dst_file_name)
 
-        print("Upload file ID is " + str(file_id) + ".")
+        log.log_info("Upload file ID is " + str(file_id) + ".")
 
         part_hashes = []
         while True:
@@ -135,5 +138,5 @@ class BackblazeB2Client:
                                                    self.auth_token, file_id,
                                                    part_len, part_hashes)
             except BackblazeB2ExpiredAuthError as e:
-                print("Reauthorizing.")
+                log.log_warning("Reauthorizing.")
                 self.authorize()
