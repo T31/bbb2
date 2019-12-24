@@ -6,6 +6,7 @@ import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2ConnectError
 from BackblazeB2Error import BackblazeB2Error
 from BackblazeB2Error import BackblazeB2ExpiredAuthError
+import log
 import util
 
 def get_cred_from_default_file():
@@ -99,17 +100,17 @@ def upload_file_big(src_file_path, api_url, auth_token, file_id, part_len,
 
             percent = str((part_len * len(part_hashes)) / file_len) + "%"
             fraction = str(part_len * len(part_hashes)) + "/" + str(file_len)
-            print("Part uploaded. " + fraction + " (" + percent + ").")
+            log.log_info("Part uploaded. " + fraction + " (" + percent + ").")
 
             part = util.util.read_file_chunk(src_file, part_len)
         except BackblazeB2ExpiredAuthError as e:
-            print("Refreshing upload URL.")
+            log.log_warning("Refreshing upload URL.")
             results = BackblazeB2Api.get_upload_part_url(api_url, auth_token,
                                                          file_id)
             upload_url = results["upload_part_url"]
             upload_auth_token = results["upload_part_auth_token"]
         except BackblazeB2ConnectError as e:
-            print("Refreshing upload URL.")
+            log.log_warning("Refreshing upload URL.")
             results = BackblazeB2Api.get_upload_part_url(api_url, auth_token,
                                                          file_id)
             upload_url = results["upload_part_url"]

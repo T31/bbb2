@@ -3,6 +3,7 @@ import traceback
 
 from BackblazeB2Client import BackblazeB2Client
 from BackblazeB2Error import BackblazeB2Error
+import log
 
 if "__main__" == __name__:
     try:
@@ -32,9 +33,9 @@ if "__main__" == __name__:
             dst_file_name = sys.argv[3]
             src_file_path = sys.argv[4]
 
-            print("Attempting to upload file \"" + src_file_path + "\""
-                  + " to bucket \"" + bucket_name + "\""
-                  + " with name \"" + dst_file_name + "\".")
+            log.log_info("Attempting to upload file \"" + src_file_path + "\""
+                         + " to bucket \"" + bucket_name + "\""
+                         + " with name \"" + dst_file_name + "\".")
 
             client = BackblazeB2Client()
             client.authorize()
