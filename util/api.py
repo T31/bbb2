@@ -25,7 +25,7 @@ def send_request(url, method, headers, body, download_part=False):
         else:
             if http.HTTPStatus.OK != response.status_code:
                 msg = "Bad HTTP response status code "
-                msg += str(reponse.status_code) + "."
+                msg += str(response.status_code) + "."
                 msg += " " + str(response)
                 raise BackblazeB2Error(msg)
 
