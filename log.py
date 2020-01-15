@@ -17,4 +17,4 @@ def log_info(msg):
     log(Level.INFO, msg)
 
 def log_warning(msg):
-    log(level.WARNING, msg)
+    log(Level.WARNING, msg)
