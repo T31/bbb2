@@ -9,6 +9,24 @@ import util.api
 import util.http
 import util.util
 
+class UploadPart:
+    part_num = None
+    content_len = None
+    sha1 = None
+
+    def __init__(self, part_num, content_len, sha1):
+        self.part_num = part_num
+        self.content_len = content_len
+        self.sha1 = sha1
+
+class ListPartsResult:
+    upload_parts = None
+    next_part = None
+
+    def __init__(self, upload_parts, next_part):
+        self.upload_parts = upload_parts
+        self.next_part = next_part
+
 API_VERSION = "v2"
 AUTH_URL = util.http.Url(util.http.Protocol.HTTPS,
                          util.http.Domain(["api", "backblazeb2", "com"]),
@@ -163,6 +181,32 @@ def list_file_names(api_url, auth_token, bucket_id):
                      "fileId" : file["fileId"]}
             ret_val[file["fileName"]] = entry
         return ret_val
+    except KeyError as e:
+        msg = "Failed to find key in response. " + str(response)
+        raise BackblazeB2Error(msg) from e
+
+def list_parts(creds, file_id, start_part = None):
+    local_api_url = copy.deepcopy(creds.api_url)
+    local_api_url.path = util.http.Path(["b2api", API_VERSION, "b2_list_parts"])
+
+    headers = {"Authorization" : creds.auth_token}
+
+    body = {"fileId" : file_id}
+    if None != start_part:
+        body["startPartNumber"] = start_part
+    body = json.dumps(body)
+
+    try:
+        response = util.api.send_request(local_api_url, util.http.Method.POST,
+                                         headers, body)
+        upload_parts = dict()
+
+        for part in response.parts:
+            upload_part = UploadPart(part["partNumber"], part["contentLength"],
+                                     part["contentSha1"])
+            upload_parts[int(part["partNumber"])] = upload_part
+
+        return ListPartsResult(upload_parts, response["nextPartNumber"])
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e

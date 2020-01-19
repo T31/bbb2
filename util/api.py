@@ -4,6 +4,21 @@ import json
 from BackblazeB2Error import BackblazeB2Error
 import util.http
 
+def list_all_parts(creds, file_id):
+    result_list = [BackblazeB2Api.list_parts(creds, file_id)]
+
+    while None != result_list[-1].next_part:
+        result = BackblazeB2Api.list_parts(creds, file_id,
+                                           result_list[-1].next_part)
+        result_list.append(result)
+
+    all_upload_parts = dict()
+    for result in result_list:
+        for part_num in result.upload_parts:
+            all_upload_parts[part_num] = result.upload_parts[part_num]
+
+    return ListPartsResult(all_upload_parts, None)
+
 def list_all_unfinished_large_files(creds, bucket_id):
     file_list = BackblazeB2Api.list_unfinished_large_files(creds, bucket_id)
     file_lists = [file_list]
