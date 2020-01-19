@@ -122,7 +122,7 @@ class Response:
         return ("ReqUrl=\"" + str(self.req_url) + "\""
                 + ", ReqHeaders=\"" + str(self.req_headers) + "\""
                 + ", ReqBody=\"" + str(self.req_body) + "\""
-                + ", StatusCode=" + str(self.status_code)
+                + ", RespStatusCode=" + str(self.status_code)
                 + ", RespHeaders=\"" + str(self.resp_headers) + "\""
                 + ", RespBody=\"" + str(self.resp_body) + "\"")
 
