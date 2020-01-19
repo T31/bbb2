@@ -9,7 +9,7 @@ import util.client
 import util.http
 import util.util
 
-class BackblazeB2Client:
+class SessionCredentials:
     account_id = None
     auth_token = None
     api_url = None
@@ -17,12 +17,24 @@ class BackblazeB2Client:
     min_upload_part_bytes = None
     recommended_upload_part_bytes = None
 
+    def __init__(self, account_id, auth_token, api_url, download_url,
+                 min_upload_part_bytes, recommended_upload_part_bytes):
+        self.account_id = account_id
+        self.auth_token = auth_token
+        self.api_url = api_url
+        self.download_url = download_url
+        self.min_upload_part_bytes = min_upload_part_bytes
+        self.recommended_upload_part_bytes = recommended_upload_part_bytes
+
+class BackblazeB2Client:
+    session_credentials = None
+
     TERABYTE = 1099511627776
     MAX_FILE_BYTES = 10 * TERABYTE
 
     MAX_UPLOAD_PARTS = 10000
 
-    def authorize(self, key_id=None, application_key=None):
+    def authorize(self, key_id = None, application_key = None):
         temp_key_id = copy.deepcopy(key_id)
         temp_application_key = copy.deepcopy(application_key)
         if (None == key_id) or (None == application_key):
@@ -31,15 +43,19 @@ class BackblazeB2Client:
             temp_application_key = cred_pair[1]
 
         response = BackblazeB2Api.authorize(temp_key_id, temp_application_key)
-        self.account_id = response["account_id"]
-        self.auth_token = response["auth_token"]
-        self.api_url = util.http.Url(util.http.Protocol.HTTP, [], [])
-        self.api_url.from_string(response["api_url"])
-        self.download_url = util.http.Url(util.http.Protocol.HTTP, [], [])
-        self.download_url.from_string(response["download_url"])
-        self.min_upload_part_bytes = response["min_part_size_bytes"]
-        self.recommended_upload_part_bytes = response["rec_part_size_bytes"]
+        account_id = response["account_id"]
+        auth_token = response["auth_token"]
+        api_url = util.http.Url(util.http.Protocol.HTTP, [], [])
+        api_url.from_string(response["api_url"])
+        download_url = util.http.Url(util.http.Protocol.HTTP, [], [])
+        download_url.from_string(response["download_url"])
+        min_upload_part_bytes = response["min_part_size_bytes"]
+        recommended_upload_part_bytes = response["rec_part_size_bytes"]
 
+        self.session_credentials = SessionCredentials(account_id, auth_token,
+                                                      api_url, download_url,
+                                                      min_upload_part_bytes,
+                                                      recommended_upload_part_bytes)
         log.log_info("Authorized.")
 
     def cancel_all_large_files(self):
