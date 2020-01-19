@@ -61,13 +61,12 @@ class BackblazeB2Client:
     def cancel_all_large_files(self):
         buckets = self.list_buckets()
         for bucket_name in buckets:
-            for file_id in BackblazeB2Api.list_unfinished_large_files(self.api_url,
-                                                                      self.auth_token,
-                                                                      buckets[bucket_name]):
-                self.cancel_large_file(file_id)
+            for file in BackblazeB2Api.list_unfinished_large_files(self.session_credentials,
+                                                                   buckets[bucket_name]):
+                self.cancel_large_file(file["file_id"])
 
     def cancel_large_file(self, file_id):
-        BackblazeB2Api.cancel_large_file(self.api_url, self.auth_token, file_id)
+        BackblazeB2Api.cancel_large_file(self.session_credentials, file_id)
         print("Cancelled large file ID " + str(file_id))
 
     def copy_file(self, src_file_id, dst_bucket_name, dst_file_name):
@@ -115,8 +114,8 @@ class BackblazeB2Client:
             out_file.close()
 
     def list_buckets(self, bucket_name=None):
-        return BackblazeB2Api.list_buckets(self.api_url, self.auth_token,
-                                           self.account_id, bucket_name)
+        return BackblazeB2Api.list_buckets(self.session_credentials,
+                                           bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
         file_len = util.util.get_file_len_bytes(src_file_path)

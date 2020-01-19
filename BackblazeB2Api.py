@@ -36,12 +36,12 @@ def authorize(key_id, application_key):
         msg = "Response missing key."
         raise BackblazeB2Error(msg) from e
 
-def cancel_large_file(api_url, auth_token, file_id):
-    local_api_url = copy.deepcopy(api_url)
+def cancel_large_file(creds, file_id):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_cancel_large_file"])
 
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"fileId" : file_id})
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
@@ -125,14 +125,14 @@ def get_upload_url(api_url, auth_token, bucket_id):
         msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
-def list_buckets(api_url, auth_token, account_id, bucket_name=None):
-    local_api_url = copy.deepcopy(api_url)
+def list_buckets(creds, bucket_name = None):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_list_buckets"])
 
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
 
-    body = {"accountId" : account_id}
+    body = {"accountId" : creds.account_id}
     if None != bucket_name:
         body["bucketName"] = bucket_name
     body = json.dumps(body)
@@ -167,11 +167,11 @@ def list_file_names(api_url, auth_token, bucket_id):
         msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
-def list_unfinished_large_files(api_url, auth_token, bucket_id):
-    local_api_url = copy.deepcopy(api_url)
+def list_unfinished_large_files(creds, bucket_id):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_list_unfinished_large_files"])
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"bucketId" : bucket_id})
 
     try:
