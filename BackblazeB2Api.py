@@ -179,7 +179,8 @@ def list_unfinished_large_files(api_url, auth_token, bucket_id):
                                          headers, body)
         ret_val = []
         for file in response["files"]:
-            ret_val.append(file["fileId"])
+            ret_val.append({"file_id" : file["fileId"],
+                            "file_name" : file["fileName"]})
         return ret_val
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)
