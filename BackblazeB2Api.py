@@ -167,20 +167,30 @@ def list_file_names(api_url, auth_token, bucket_id):
         msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
-def list_unfinished_large_files(creds, bucket_id):
+def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
     local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_list_unfinished_large_files"])
+
     headers = {"Authorization" : creds.auth_token}
-    body = json.dumps({"bucketId" : bucket_id})
+
+    body = {"bucketId" : bucket_id}
+    if None != start_file_id:
+        body["startFileId"] = start_file_id
+    body = json.dumps(body)
 
     try:
         response = util.api.send_request(local_api_url, util.http.Method.POST,
                                          headers, body)
         ret_val = []
+
         for file in response["files"]:
             ret_val.append({"file_id" : file["fileId"],
                             "file_name" : file["fileName"]})
+
+        if None != response["nextFileId"]:
+            ret_val["next_file_id"] = response["nextFileId"]
+
         return ret_val
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)

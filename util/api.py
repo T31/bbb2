@@ -4,6 +4,22 @@ import json
 from BackblazeB2Error import BackblazeB2Error
 import util.http
 
+def list_all_unfinished_large_files(creds, bucket_id):
+    file_list = BackblazeB2Api.list_unfinished_large_files(creds, bucket_id)
+    file_lists = [file_list]
+
+    while "next_file_id" not in file_lists[-1]:
+        next_file_id = file_lists[-1]["next_file_id"]
+        file_list = BackblazeB2Api.list_unfinished_large_files(creds, bucket_id,
+                                                               next_file_id)
+        unfinished_upload_chunks.append(file_list)
+
+    ret_val = []
+    for file_list in file_lists:
+        for file in file_list:
+            ret_val.append(file)
+    return ret_val
+
 def send_request(url, method, headers, body, download_part=False):
     try:
         response = util.http.send_request(url, method, headers, body)
