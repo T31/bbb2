@@ -1,6 +1,8 @@
 import http
 import json
 
+import BackblazeB2Api
+from BackblazeB2Error import BackblazeB2BadRequestError
 from BackblazeB2Error import BackblazeB2Error
 import util.http
 
@@ -17,23 +19,24 @@ def list_all_parts(creds, file_id):
         for part_num in result.upload_parts:
             all_upload_parts[part_num] = result.upload_parts[part_num]
 
-    return ListPartsResult(all_upload_parts, None)
+    return BackblazeB2Api.ListPartsResult(all_upload_parts, None)
 
 def list_all_unfinished_large_files(creds, bucket_id):
-    file_list = BackblazeB2Api.list_unfinished_large_files(creds, bucket_id)
-    file_lists = [file_list]
+    list_of_lists = [BackblazeB2Api.list_unfinished_large_files(creds,
+                                                                bucket_id)]
 
-    while "next_file_id" not in file_lists[-1]:
-        next_file_id = file_lists[-1]["next_file_id"]
-        file_list = BackblazeB2Api.list_unfinished_large_files(creds, bucket_id,
-                                                               next_file_id)
-        unfinished_upload_chunks.append(file_list)
+    while None != list_of_lists[-1].next_file:
+        next_file_id = list_of_lists[-1].next_file
+        new_list = BackblazeB2Api.list_unfinished_large_files(creds, bucket_id,
+                                                              next_file_id)
+        list_of_lists.append(new_list)
 
-    ret_val = []
-    for file_list in file_lists:
-        for file in file_list:
-            ret_val.append(file)
-    return ret_val
+    complete_list = []
+    for inner_list in list_of_lists:
+        for unfinished_large_file in inner_list.unfinished_files:
+            complete_list.append(unfinished_large_file)
+
+    return BackblazeB2Api.ListUnfinishedLargeFilesResult(complete_list, None)
 
 def send_request(url, method, headers, body, download_part=False):
     try:
@@ -54,6 +57,10 @@ def send_request(url, method, headers, body, download_part=False):
                 msg += " " + str(response)
                 raise BackblazeB2Error(msg)
         else:
+            if http.HTTPStatus.BAD_REQUEST == response.status_code:
+                msg = "Bad request sent."
+                msg += " " + str(response)
+                raise BackblazeB2BadRequestError(msg)
             if http.HTTPStatus.OK != response.status_code:
                 msg = "Bad HTTP response status code "
                 msg += str(response.status_code) + "."

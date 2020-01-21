@@ -27,6 +27,22 @@ class ListPartsResult:
         self.upload_parts = upload_parts
         self.next_part = next_part
 
+class UnfinishedLargeFile:
+    file_id = None
+    file_name = None
+
+    def __init__(self, file_id, file_name):
+        self.file_id = file_id
+        self.file_name = file_name
+
+class ListUnfinishedLargeFilesResult:
+    unfinished_files = None
+    next_file = None
+
+    def __init__(self, unfinished_files, next_file):
+        self.unfinished_files = unfinished_files
+        self.next_file = next_file
+
 API_VERSION = "v2"
 AUTH_URL = util.http.Url(util.http.Protocol.HTTPS,
                          util.http.Domain(["api", "backblazeb2", "com"]),
@@ -101,20 +117,20 @@ def download_file_by_name(download_url, auth_token, bucket_name, file_name,
     return util.api.send_request(local_download_url, util.http.Method.GET,
                                  headers, None, True)
 
-def finish_large_file(api_url, auth_token, file_id, sha1_part_hashes):
-    local_api_url = copy.deepcopy(api_url)
+def finish_large_file(creds, file_id, sha1_part_hashes):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_finish_large_file"])
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"fileId" : file_id, "partSha1Array" : sha1_part_hashes})
     util.api.send_request(local_api_url, util.http.Method.POST, headers, body)
 
-def get_upload_part_url(api_url, auth_token, file_id):
-    local_api_url = copy.deepcopy(api_url)
+def get_upload_part_url(creds, file_id):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_get_upload_part_url"])
 
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"fileId" : file_id})
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
@@ -201,7 +217,7 @@ def list_parts(creds, file_id, start_part = None):
                                          headers, body)
         upload_parts = dict()
 
-        for part in response.parts:
+        for part in response["parts"]:
             upload_part = UploadPart(part["partNumber"], part["contentLength"],
                                      part["contentSha1"])
             upload_parts[int(part["partNumber"])] = upload_part
@@ -226,26 +242,23 @@ def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
     try:
         response = util.api.send_request(local_api_url, util.http.Method.POST,
                                          headers, body)
-        ret_val = []
 
+        file_list = []
         for file in response["files"]:
-            ret_val.append({"file_id" : file["fileId"],
-                            "file_name" : file["fileName"]})
+            file_list.append(UnfinishedLargeFile(file["fileId"],
+                                                  file["fileName"]))
 
-        if None != response["nextFileId"]:
-            ret_val["next_file_id"] = response["nextFileId"]
-
-        return ret_val
+        return ListUnfinishedLargeFilesResult(file_list, response["nextFileId"])
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
-def start_large_file(api_url, auth_token, bucket_id, dst_file_name):
-    local_api_url = copy.deepcopy(api_url)
+def start_large_file(creds, bucket_id, dst_file_name):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_start_large_file"])
 
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
 
     body = {"bucketId" : bucket_id,
             "fileName" : dst_file_name,
@@ -271,7 +284,7 @@ def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
     if None != src_file_sha1:
         headers["X-Bz-Content-Sha1"] = src_file_sha1
     else:
-        headers["X-Bz-Content-Sha1"] = util.util.calc_sha1(src_file_path)
+        headers["X-Bz-Content-Sha1"] = util.util.calc_sha1_file(src_file_path)
 
     body = util.util.get_entire_file(src_file_path)
 
