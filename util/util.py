@@ -12,7 +12,12 @@ def get_file_len_bytes(file_path):
                " SrcFilePath=\"" + str(file_path) + "\".")
         raise BackblazeB2Error(msg) from e
 
-def calc_sha1(file_path):
+def calc_sha1(data):
+    hasher = hashlib.sha1()
+    hasher.update(data)
+    return hasher.hexdigest()
+
+def calc_sha1_file(file_path):
     file_stream = None
     try:
         file_stream = open(file=file_path, mode='rb')
