@@ -32,7 +32,7 @@ class SessionCredentials:
         self.recommended_upload_part_bytes = recommended_upload_part_bytes
 
 class BackblazeB2Client:
-    session_credentials = None
+    credentials = None
 
     def authorize(self, key_id = None, application_key = None):
         temp_key_id = copy.deepcopy(key_id)
@@ -52,26 +52,26 @@ class BackblazeB2Client:
         min_upload_part_bytes = response["min_part_size_bytes"]
         recommended_upload_part_bytes = response["rec_part_size_bytes"]
 
-        self.session_credentials = SessionCredentials(account_id, auth_token,
-                                                      api_url, download_url,
-                                                      min_upload_part_bytes,
-                                                      recommended_upload_part_bytes)
+        self.credentials = SessionCredentials(account_id, auth_token, api_url,
+                                              download_url,
+                                              min_upload_part_bytes,
+                                              recommended_upload_part_bytes)
         log.log_info("Authorized.")
 
     def cancel_all_large_files(self):
-        creds = self.session_credentials
-
         for bucket_name in self.list_buckets():
-            bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
+            bucket_id = util.client.get_bucket_id_from_name(self.credentials,
+                                                            bucket_name)
 
             unfinished_files = \
-            BackblazeB2Api.list_unfinished_large_files(creds, bucket_id)
+            BackblazeB2Api.list_unfinished_large_files(self.credentials,
+                                                       bucket_id)
 
             for file in unfinished_files.unfinished_files:
                 self.cancel_large_file(file.file_id)
 
     def cancel_large_file(self, file_id):
-        BackblazeB2Api.cancel_large_file(self.session_credentials, file_id)
+        BackblazeB2Api.cancel_large_file(self.credentials, file_id)
         print("Cancelled large file ID " + str(file_id))
 
     def copy_file(self, src_file_id, dst_bucket_name, dst_file_name):
@@ -119,8 +119,7 @@ class BackblazeB2Client:
             out_file.close()
 
     def list_buckets(self, bucket_name=None):
-        return BackblazeB2Api.list_buckets(self.session_credentials,
-                                           bucket_name)
+        return BackblazeB2Api.list_buckets(self.credentials, bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
         file_len = util.util.get_file_len_bytes(src_file_path)
@@ -133,17 +132,17 @@ class BackblazeB2Client:
                                    + " exceeds max file bytes "
                                    + str(SessionCredentials.MAX_FILE_BYTES) + ".")
 
-        if file_len <= self.session_credentials.recommended_upload_part_bytes:
-            util.client.upload_file_small(self.session_credentials, bucket_name,
+        if file_len <= self.credentials.recommended_upload_part_bytes:
+            util.client.upload_file_small(self.credentials, bucket_name,
                                           dst_file_name, src_file_path)
         else:
             uploaded_parts = util.client.UnfinishedUpload()
 
             while True:
                 try:
-                    util.client.upload_file_big(self.session_credentials,
-                                                src_file_path, bucket_name,
-                                                dst_file_name, uploaded_parts)
+                    util.client.upload_file_big(self.credentials, src_file_path,
+                                                bucket_name, dst_file_name,
+                                                uploaded_parts)
                     return
                 except BackblazeB2ExpiredAuthError as e:
                     log.log_warning("Reauthorizing.")
