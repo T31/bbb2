@@ -37,6 +37,14 @@ def check_for_upload_parts(creds, bucket_name, file_name):
     upload_parts = util.api.list_all_parts(creds, file_id).upload_parts
     return UnfinishedUpload(file_id, file_name, upload_parts)
 
+def get_bucket_id_from_name(creds, bucket_name):
+    buckets = BackblazeB2Api.list_buckets(creds, bucket_name)
+    try:
+        return buckets[bucket_name]
+    except KeyError as e:
+        raise BackblazeB2Error("No bucket ID found for bucket name \""
+                               + bucket_name + "\".") from e
+
 def get_cred_from_default_file():
     cred_file_path = pathlib.Path.home() / ".bbb2_cred.json"
 
@@ -64,37 +72,19 @@ def get_cred_from_default_file():
     finally:
         cred_file.close()
 
-def get_bucket_id_from_name(creds, bucket_name):
-    buckets = BackblazeB2Api.list_buckets(creds, bucket_name)
+def get_file_info(api_url, auth_token, account_id, bucket_name, file_name):
+    bucket_id = get_bucket_id_from_name(api_url, auth_token,
+                                                    account_id, bucket_name)
+    bucket_files = BackblazeB2Api.list_file_names(api_url, auth_token,
+                                                  bucket_id)
     try:
-        return buckets[bucket_name]
+        return bucket_files[file_name]
     except KeyError as e:
-        raise BackblazeB2Error("No bucket ID found for bucket name \""
-                               + bucket_name + "\".") from e
-
-def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
-    bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
-    if None == bucket_id:
-        raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
-                               + "\".")
-
-    vals = BackblazeB2Api.get_upload_url(creds.api_url, creds.auth_token,
-                                         bucket_id)
-
-    upload_url = util.http.Url(util.http.Protocol.HTTPS, [], [])
-    upload_url.from_string(vals["upload_url"])
-
-    upload_auth_token = vals["upload_auth_token"]
-
-    results = BackblazeB2Api.upload_file(upload_url, upload_auth_token,
-                                         dst_file_name, src_file_path)
-    msg = "File upload complete."
-    msg += " SrcFilePath=\"" + str(src_file_path) + "\""
-    msg += ", DstFileName=\"" + results["file_name"] + "\""
-    msg += ", FileId=\"" + results["file_id"] + "\""
-    msg += ", BucketId=\"" + results["bucket_id"] + "\""
-    msg += ", FileHashSha1=\"" + results["hash_sha1"] + "\"."
-    print(msg)
+        msg = "Unable to get file info."
+        msg += " AccountID=\"" + str(account_id) + "\""
+        msg += ", bucketName=\"" + bucket_name + "\""
+        msg += ", fileName=\"" + file_name + "\"."
+        raise BackblazeB2Error(msg) from e
 
 def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                     uploaded_parts):
@@ -179,16 +169,26 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
     BackblazeB2Api.finish_large_file(creds, file_id, part_hashes)
 
-def get_file_info(api_url, auth_token, account_id, bucket_name, file_name):
-    bucket_id = get_bucket_id_from_name(api_url, auth_token,
-                                                    account_id, bucket_name)
-    bucket_files = BackblazeB2Api.list_file_names(api_url, auth_token,
-                                                  bucket_id)
-    try:
-        return bucket_files[file_name]
-    except KeyError as e:
-        msg = "Unable to get file info."
-        msg += " AccountID=\"" + str(account_id) + "\""
-        msg += ", bucketName=\"" + bucket_name + "\""
-        msg += ", fileName=\"" + file_name + "\"."
-        raise BackblazeB2Error(msg) from e
+def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
+    bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
+    if None == bucket_id:
+        raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
+                               + "\".")
+
+    vals = BackblazeB2Api.get_upload_url(creds.api_url, creds.auth_token,
+                                         bucket_id)
+
+    upload_url = util.http.Url(util.http.Protocol.HTTPS, [], [])
+    upload_url.from_string(vals["upload_url"])
+
+    upload_auth_token = vals["upload_auth_token"]
+
+    results = BackblazeB2Api.upload_file(upload_url, upload_auth_token,
+                                         dst_file_name, src_file_path)
+    msg = "File upload complete."
+    msg += " SrcFilePath=\"" + str(src_file_path) + "\""
+    msg += ", DstFileName=\"" + results["file_name"] + "\""
+    msg += ", FileId=\"" + results["file_id"] + "\""
+    msg += ", BucketId=\"" + results["bucket_id"] + "\""
+    msg += ", FileHashSha1=\"" + results["hash_sha1"] + "\"."
+    print(msg)
