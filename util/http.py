@@ -18,6 +18,19 @@ class Domain:
     def __init__(self, domain = []):
         self.domain = domain
 
+    def __eq__(self, other):
+        if None == other:
+            return False
+
+        if len(self.domain) != len(other.domain):
+            return False
+
+        for i in range(0, len(self.domain)):
+            if self.domain[i] != other.domain[i]:
+                return False
+
+        return True
+
     def __str__(self):
         retVal = ""
         separator = ""
@@ -32,6 +45,19 @@ class Path:
 
     def __init__(self, path = []):
         self.path = path
+
+    def __eq__(self, other):
+        if None == other:
+            return False
+
+        if len(self.path) != len(other.path):
+            return False
+
+        for i in range(0, len(self.path)):
+            if self.path[i] != other.path[i]:
+                return False
+
+        return True
 
     def __str__(self):
         retVal = "/"
@@ -51,6 +77,14 @@ class Url:
         self.protocol = protocol
         self.domain = domain
         self.path = path
+
+    def __eq__(self, other):
+        if None == other:
+            return False
+
+        return ((self.protocol == other.protocol)
+                and (self.domain == other.domain)
+                and (self.path == other.path))
 
     def from_string(self, url_string):
         start_idx_inc = 0
@@ -126,37 +160,61 @@ class Response:
                 + ", RespHeaders=\"" + str(self.resp_headers) + "\""
                 + ", RespBody=\"" + str(self.resp_body) + "\"")
 
-def send_request(url, method, headers, body):
+class CachedConnection:
+    url = None
     connection = None
-    if Protocol.HTTP == url.protocol:
-        connection = http.client.HTTPConnection(host=str(url.domain))
-    elif Protocol.HTTPS == url.protocol:
-        connection = http.client.HTTPSConnection(host=str(url.domain))
-    else:
-        raise BackblazeB2Error("Invalid protocol value in URL ("
-                               + str(url.protocol) + ")")
+
+    def __init__(self, url, connection):
+        self.url = url
+        self.connection = connection
+
+    def clear(self):
+        if None != self.connection:
+            self.connection.close()
+
+        self.connection = None
+        self.url = None
+
+cached_connection = CachedConnection(None, None)
+
+def send_request(url, method, headers, body):
+    global cached_connection
+
+    if url != cached_connection.url:
+        cached_connection.clear()
+        cached_connection.url = url
+
+        if Protocol.HTTP == url.protocol:
+            cached_connection.connection \
+            = http.client.HTTPConnection(host=str(url.domain))
+        elif Protocol.HTTPS == url.protocol:
+            cached_connection.connection \
+            = http.client.HTTPSConnection(host=str(url.domain))
+        else:
+            raise BackblazeB2Error("Invalid protocol value in URL ("
+                                   + str(url.protocol) + ")")
     try:
         if Method.GET == method:
-            connection.request(method='GET', url=str(url), headers=headers)
+            cached_connection.connection.request(method='GET', url=str(url),
+                                                 headers=headers)
         elif Method.POST == method:
-            connection.request(method='POST', url=str(url), headers=headers,
-                               body=body)
+            cached_connection.connection.request(method='POST', url=str(url),
+                                                 headers=headers, body=body)
         else:
             raise BackblazeB2Error("Invalid HTTP method value"
                                    + " (" + str(method) + ")")
 
-        response = connection.getresponse()
+        response = cached_connection.connection.getresponse()
         resp_body = response.read()
         return Response(url, headers, body, response.status,
                         response.getheaders(), resp_body)
     except ConnectionResetError as e:
+        cached_connection.clear()
         msg = "Connection error during HTTP request. Url=\"" + str(url) + "\""
         msg += ", method=\"" + str(method) + "\""
         msg += ", req_headers=\"" + str(headers) + "\""
         msg += ", req_body=\"" + str(body) + "\"."
         raise BackblazeB2ConnectError(msg) from e
-    finally:
-        connection.close()
 
 if "__main__" == __name__:
     u = Url(Protocol.HTTP, [], [])
