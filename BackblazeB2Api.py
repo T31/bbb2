@@ -95,14 +95,15 @@ def copy_file(api_url, auth_token, src_file_id, dst_bucket_id, dst_file_name):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
 
-def download_file_by_id(download_url, auth_token, file_id, start_idx_inc,
-                        end_idx_inc):
-    local_download_url = copy.deepcopy(download_url)
-    local_download_url.path = util.http.Path(["b2api", API_VERSION,
-                                              "b2_download_file_by_id?fileId=" + file_id])
+def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
+    local_download_url = copy.deepcopy(creds.download_url)
+
+    local_download_url.path \
+    = util.http.Path(["b2api", API_VERSION,
+                      "b2_download_file_by_id?fileId=" + file_id])
 
     range_str = "bytes=" + str(start_idx_inc) + "-" + str(end_idx_inc)
-    headers = {"Authorization" : auth_token, "Range" : range_str}
+    headers = {"Authorization" : creds.auth_token, "Range" : range_str}
     body = json.dumps({"fileId" : file_id})
     return util.api.send_request(local_download_url, util.http.Method.POST,
                                  headers, body, True)
@@ -182,11 +183,11 @@ def list_buckets(creds, bucket_name = None):
         msg = "Failed to find key in response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
-def list_file_names(api_url, auth_token, bucket_id):
-    local_api_url = copy.deepcopy(api_url)
+def list_file_names(creds, bucket_id):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_list_file_names"])
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"bucketId" : bucket_id})
     try:
         response = util.api.send_request(local_api_url, util.http.Method.POST,

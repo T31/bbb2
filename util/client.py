@@ -72,11 +72,10 @@ def get_cred_from_default_file():
     finally:
         cred_file.close()
 
-def get_file_info(api_url, auth_token, account_id, bucket_name, file_name):
-    bucket_id = get_bucket_id_from_name(api_url, auth_token,
-                                                    account_id, bucket_name)
-    bucket_files = BackblazeB2Api.list_file_names(api_url, auth_token,
-                                                  bucket_id)
+def get_file_info(creds, bucket_name, file_name):
+    bucket_id = get_bucket_id_from_name(creds, bucket_name)
+    bucket_files = BackblazeB2Api.list_file_names(creds, bucket_id)
+
     try:
         return bucket_files[file_name]
     except KeyError as e:
