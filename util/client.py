@@ -1,6 +1,7 @@
 import json
 import os
 import pathlib
+import time
 
 import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2ConnectError
@@ -120,6 +121,8 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     part_num = 1
     part = util.util.read_file_chunk(src_file, part_len)
     while len(part) > 0:
+        time.sleep(1)
+
         part_sha1 = util.util.calc_sha1(part)
 
         if ((part_num in uploaded_parts.uploaded_parts)
