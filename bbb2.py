@@ -5,13 +5,22 @@ from BackblazeB2Client import BackblazeB2Client
 from BackblazeB2Error import BackblazeB2Error
 import log
 
+def get_help_msg():
+    return ("Usage : bbb2 --list-buckets\n"
+            + "        bbb2 --upload-file dstBucketName dstName srcPath\n"
+            + "        bbb2 --cancel-all-large-file-uploads\n"
+            + "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n"
+            + "        bbb2 --download srcBucketName srcFileName dstFilePath")
+
 if "__main__" == __name__:
     try:
         if len(sys.argv) <= 1:
             print("Please provide command line argument(s).")
             sys.exit(1)
 
-        if sys.argv[1] == "--list-buckets":
+        if (sys.argv[1] == "-h") or (sys.argv[1] == "--help"):
+            print(get_help_msg())
+        elif sys.argv[1] == "--list-buckets":
             client = BackblazeB2Client()
             client.authorize()
 
@@ -22,7 +31,6 @@ if "__main__" == __name__:
             for bucket in client.list_buckets(specific_bucket):
                 print("[BucketName=" + bucket[0]
                       + ", BucketId=" + bucket[1] + "]")
-
         elif sys.argv[1] == "--upload-file":
             if len(sys.argv) < 5:
                 print("Please provide a bucket name, destination file name"
@@ -59,5 +67,8 @@ if "__main__" == __name__:
             client = BackblazeB2Client()
             client.authorize()
             client.download_file(src_bucket_name, src_file_name, dst_file_path)
+        else:
+            print("Unrecognized args.")
+            print(get_help_msg())
     except BackblazeB2Error as e:
         traceback.print_exc()
