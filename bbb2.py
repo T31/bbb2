@@ -28,9 +28,10 @@ if "__main__" == __name__:
             if len(sys.argv) > 2:
                 specific_bucket = sys.argv[2]
 
-            for bucket in client.list_buckets(specific_bucket):
-                print("[BucketName=" + bucket[0]
-                      + ", BucketId=" + bucket[1] + "]")
+            buckets = client.list_buckets(specific_bucket)
+            for name in buckets:
+                print("[BucketName=" + name
+                      + ", BucketId=" + buckets[name] + "]")
         elif sys.argv[1] == "--upload-file":
             if len(sys.argv) < 5:
                 print("Please provide a bucket name, destination file name"
