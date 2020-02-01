@@ -6,7 +6,7 @@ from BackblazeB2Error import BackblazeB2Error
 import log
 
 def get_help_msg():
-    return ("Usage : bbb2 --list-buckets\n"
+    return ("Usage : bbb2 --list-buckets [bucketName]\n"
             + "        bbb2 --upload-file dstBucketName dstName srcPath\n"
             + "        bbb2 --cancel-all-large-file-uploads\n"
             + "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n"
