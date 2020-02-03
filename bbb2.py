@@ -2,6 +2,7 @@ import sys
 import traceback
 
 from BackblazeB2Client import BackblazeB2Client
+from BackblazeB2Error import BackblazeB2ConnectError
 from BackblazeB2Error import BackblazeB2Error
 import log
 
@@ -66,8 +67,15 @@ if "__main__" == __name__:
             src_file_name = sys.argv[3]
             dst_file_path = sys.argv[4]
             client = BackblazeB2Client()
-            client.authorize()
-            client.download_file(src_bucket_name, src_file_name, dst_file_path)
+            while True:
+                try:
+                    client.authorize()
+                    client.download_file(src_bucket_name, src_file_name,
+                                         dst_file_path)
+                    break
+                except BackblazeB2ConnectError as e:
+                    log.log_warning("Connect error during download."
+                                    + " Reauthorizing.")
         else:
             print("Unrecognized args.")
             print(get_help_msg())
