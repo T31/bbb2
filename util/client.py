@@ -148,8 +148,8 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
             uploaded_parts.uploaded_parts[part_num] = part_record
 
-            percent = str((part_len * part_num) / file_len) + "%"
-            fraction = str(part_len * part_num) + "/" + str(file_len)
+            percent = str((len(part) * part_num) / file_len) + "%"
+            fraction = str(len(part) * part_num) + "/" + str(file_len)
             log.log_info("Part uploaded. " + fraction + " (" + percent + ").")
 
             part_num += 1
