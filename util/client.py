@@ -154,12 +154,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
             part_num += 1
             part = util.util.read_file_chunk(src_file, part_len)
-        except BackblazeB2ExpiredAuthError as e:
-            log.log_warning("Refreshing upload URL.")
-            results = BackblazeB2Api.get_upload_part_url(creds, file_id)
-            upload_url.from_string(results["upload_part_url"])
-            upload_auth_token = results["upload_part_auth_token"]
-        except BackblazeB2ConnectError as e:
+        except (BackblazeB2ConnectError, BackblazeB2ExpiredAuthError) as e:
             log.log_warning("Refreshing upload URL.")
             results = BackblazeB2Api.get_upload_part_url(creds, file_id)
             upload_url.from_string(results["upload_part_url"])
