@@ -1,4 +1,5 @@
 import enum
+import os
 
 class Level(enum.Enum):
     DEBUG = 0
@@ -7,11 +8,12 @@ class Level(enum.Enum):
     ERROR = 3
     FATAL = 4
 
-    def log_form(self):
+    def __str__(self):
         return self.name
 
 def log(level, msg):
-    print(level.log_form() + " : " + str(msg))
+    print(str(level) + " : " + str(msg))
+    sys.stdout.flush()
 
 def log_info(msg):
     log(Level.INFO, msg)
