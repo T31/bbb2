@@ -4,6 +4,7 @@ import json
 import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2BadRequestError
 from BackblazeB2Error import BackblazeB2Error
+from BackblazeB2Error import BackblazeB2ExpiredAuthError
 import util.http
 
 def list_all_parts(creds, file_id):
