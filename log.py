@@ -15,6 +15,9 @@ def log(level, msg):
     print(str(level) + " : " + str(msg))
     sys.stdout.flush()
 
+def log_error(msg):
+    log(Level.ERROR, msg)
+
 def log_info(msg):
     log(Level.INFO, msg)
 

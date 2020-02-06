@@ -88,6 +88,8 @@ def get_file_info(creds, bucket_name, file_name):
 
 def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                     uploaded_parts):
+    consecutive_failures = 0
+
     file_len = util.util.get_file_len_bytes(src_file_path)
 
     part_len = creds.recommended_upload_part_bytes
@@ -121,6 +123,12 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     part_num = 1
     part = util.util.read_file_chunk(src_file, part_len)
     while len(part) > 0:
+        # BackblazeB2 documentation says 5 consecutive failures implies
+        # implies something wrong on their end.
+        if 5 <= consecutive_failures:
+            log.log_error("Max consecutive upload failures reached. Aborting.")
+            return False
+
         time.sleep(1)
 
         part_sha1 = util.util.calc_sha1(part)
@@ -138,6 +146,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
         try:
             result = BackblazeB2Api.upload_part(upload_url, upload_auth_token,
                                                 part_num, part)
+            consecutive_failures = 0
 
             if part_sha1 != result["sha1_hash"]:
                 log.log_warning("SHA1 mismatch. Retrying.")
@@ -155,6 +164,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
             part_num += 1
             part = util.util.read_file_chunk(src_file, part_len)
         except (BackblazeB2ConnectError, BackblazeB2ExpiredAuthError) as e:
+            consecutive_failures += 1
             log.log_warning("Refreshing upload URL.")
             results = BackblazeB2Api.get_upload_part_url(creds, file_id)
             upload_url.from_string(results["upload_part_url"])
@@ -165,6 +175,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
         part_hashes.append(uploaded_parts.uploaded_parts[i].sha1)
 
     BackblazeB2Api.finish_large_file(creds, file_id, part_hashes)
+    return True
 
 def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
     bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
