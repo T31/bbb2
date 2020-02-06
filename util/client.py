@@ -124,7 +124,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     part = util.util.read_file_chunk(src_file, part_len)
     while len(part) > 0:
         # BackblazeB2 documentation says 5 consecutive failures implies
-        # implies something wrong on their end.
+        # something wrong on their end.
         if 5 <= consecutive_failures:
             log.log_error("Max consecutive upload failures reached. Aborting.")
             return False
