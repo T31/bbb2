@@ -129,8 +129,6 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
             log.log_error("Max consecutive upload failures reached. Aborting.")
             return False
 
-        time.sleep(1)
-
         part_sha1 = util.util.calc_sha1(part)
 
         if ((part_num in uploaded_parts.uploaded_parts)
@@ -144,6 +142,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
             continue
 
         try:
+            time.sleep(1)
             result = BackblazeB2Api.upload_part(upload_url, upload_auth_token,
                                                 part_num, part)
             consecutive_failures = 0
