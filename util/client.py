@@ -38,6 +38,11 @@ def check_for_upload_parts(creds, bucket_name, file_name):
     upload_parts = util.api.list_all_parts(creds, file_id).upload_parts
     return UnfinishedUpload(file_id, file_name, upload_parts)
 
+def gen_fraction_percent_str(numerator, denominator):
+    fraction = str(numerator) + "/" + str(denominator)
+    percent = str(numerator / denominator) + "%"
+    return fraction + "(" + percent + ")"
+
 def get_bucket_id_from_name(creds, bucket_name):
     buckets = BackblazeB2Api.list_buckets(creds, bucket_name)
     try:
@@ -120,6 +125,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     upload_url.from_string(upload_creds["upload_part_url"])
     upload_auth_token = upload_creds["upload_part_auth_token"]
 
+    total_bytes_uploaded = 0
     part_num = 1
     part = util.util.read_file_chunk(src_file, part_len)
     while len(part) > 0:
@@ -151,14 +157,15 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                 log.log_warning("SHA1 mismatch. Retrying.")
                 continue
 
+            total_bytes_uploaded += len(part)
             part_record = BackblazeB2Api.UploadPart(part_num, len(part),
                                                     part_sha1)
 
             uploaded_parts.uploaded_parts[part_num] = part_record
 
-            percent = str((len(part) * part_num) / file_len) + "%"
-            fraction = str(len(part) * part_num) + "/" + str(file_len)
-            log.log_info("Part uploaded. " + fraction + " (" + percent + ").")
+            log.log_info("Part uploaded. "
+                         + gen_fraction_percent_str(total_bytes_uploaded,
+                                                    file_len) + ".")
 
             part_num += 1
             part = util.util.read_file_chunk(src_file, part_len)
