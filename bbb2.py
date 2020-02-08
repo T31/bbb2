@@ -12,7 +12,7 @@ class ExitCode(enum.Enum):
     USER_ERROR = 1
     INTERNAL_ERROR = 2
 
-def get_help_msg():
+def usage_msg():
     return ("Usage : bbb2 --list-buckets [bucketName]\n"
             + "        bbb2 --upload-file dstBucketName dstName srcPath\n"
             + "        bbb2 --cancel-all-large-file-uploads\n"
@@ -26,7 +26,7 @@ if "__main__" == __name__:
             sys.exit(ExitCode.USER_ERROR)
 
         if (sys.argv[1] == "-h") or (sys.argv[1] == "--help"):
-            print(get_help_msg())
+            print(usage_msg())
         elif sys.argv[1] == "--list-buckets":
             client = BackblazeB2Client()
             client.authorize()
@@ -83,8 +83,8 @@ if "__main__" == __name__:
                     log.log_warning("Connect error during download."
                                     + " Reauthorizing.")
         else:
-            print("Unrecognized args.")
-            print(get_help_msg())
+            print("Unrecognized args.\n"
+                  + usage_msg())
     except BackblazeB2Error as e:
         log.log_error("Aborting due to error.")
         traceback.print_exc()
