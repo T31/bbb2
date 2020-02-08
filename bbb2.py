@@ -1,3 +1,4 @@
+import enum
 import sys
 import traceback
 
@@ -5,6 +6,11 @@ from BackblazeB2Client import BackblazeB2Client
 from BackblazeB2Error import BackblazeB2ConnectError
 from BackblazeB2Error import BackblazeB2Error
 import log
+
+class ExitCode(enum.Enum):
+    NORMAL = 0
+    USER_ERROR = 1
+    INTERNAL_ERROR = 2
 
 def get_help_msg():
     return ("Usage : bbb2 --list-buckets [bucketName]\n"
@@ -17,7 +23,7 @@ if "__main__" == __name__:
     try:
         if len(sys.argv) <= 1:
             print("Please provide command line argument(s).")
-            sys.exit(1)
+            sys.exit(ExitCode.USER_ERROR)
 
         if (sys.argv[1] == "-h") or (sys.argv[1] == "--help"):
             print(get_help_msg())
@@ -37,7 +43,7 @@ if "__main__" == __name__:
             if len(sys.argv) < 5:
                 print("Please provide a bucket name, destination file name"
                       + ", and a source file path.")
-                sys.exit(1)
+                sys.exit(ExitCode.USER_ERROR)
 
             bucket_name = sys.argv[2]
             dst_file_name = sys.argv[3]
@@ -82,4 +88,4 @@ if "__main__" == __name__:
     except BackblazeB2Error as e:
         log.log_error("Aborting due to error.")
         traceback.print_exc()
-        sys.exit(1)
+        sys.exit(ExitCode.INTERNAL_ERROR)
