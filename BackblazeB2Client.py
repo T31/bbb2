@@ -96,6 +96,7 @@ class BackblazeB2Client:
         out_file = None
         try:
             if (os.path.exists(dst_file_path)):
+                log.log_info("File already exists. Appending.")
                 out_file = open(file=dst_file_path, mode='ab')
                 bytes_downloaded = util.util.get_file_len_bytes(dst_file_path)
             else:
