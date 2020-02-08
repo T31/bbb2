@@ -80,4 +80,6 @@ if "__main__" == __name__:
             print("Unrecognized args.")
             print(get_help_msg())
     except BackblazeB2Error as e:
+        log.log_error("Aborting due to error.")
         traceback.print_exc()
+        sys.exit(1)
