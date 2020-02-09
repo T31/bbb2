@@ -144,6 +144,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
             log.log_info("Part " + str(part_num) + " already uploaded.")
 
             part_num += 1
+            total_bytes_uploaded += len(part)
             part = util.util.read_file_chunk(src_file, part_len)
             continue
 
