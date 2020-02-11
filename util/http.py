@@ -208,7 +208,7 @@ def send_request(url, method, headers, body):
         resp_body = response.read()
         return Response(url, headers, body, response.status,
                         response.getheaders(), resp_body)
-    except (BrokenPipeError, ConnectionResetError) as e:
+    except (IncompleteRead, BrokenPipeError, ConnectionResetError) as e:
         cached_connection.clear()
         msg = "Connection error during HTTP request. Url=\"" + str(url) + "\""
         msg += ", method=\"" + str(method) + "\""
