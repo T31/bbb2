@@ -41,7 +41,7 @@ def check_for_upload_parts(creds, bucket_name, file_name):
 def gen_fraction_percent_str(numerator, denominator):
     fraction = str(numerator) + "/" + str(denominator)
     percent = str(numerator / denominator) + "%"
-    return fraction + "(" + percent + ")"
+    return fraction + " (" + percent + ")"
 
 def get_bucket_id_from_name(creds, bucket_name):
     buckets = BackblazeB2Api.list_buckets(creds, bucket_name)
