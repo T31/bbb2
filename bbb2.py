@@ -14,7 +14,7 @@ class ExitCode(enum.Enum):
 
 def usage_msg():
     return ("Usage : bbb2 --list-buckets [bucketName]\n"
-            + "        bbb2 --upload-file dstBucketName dstName srcPath\n"
+            + "        bbb2 --upload dstBucketName dstName srcPath\n"
             + "        bbb2 --cancel-all-large-file-uploads\n"
             + "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n"
             + "        bbb2 --download srcBucketName srcFileName dstFilePath")
@@ -39,7 +39,7 @@ if "__main__" == __name__:
             for name in buckets:
                 print("[BucketName=" + name
                       + ", BucketId=" + buckets[name] + "]")
-        elif sys.argv[1] == "--upload-file":
+        elif sys.argv[1] == "--upload":
             if len(sys.argv) < 5:
                 print("Please provide a bucket name, destination file name"
                       + ", and a source file path.")
