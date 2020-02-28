@@ -86,7 +86,7 @@ def get_file_info(creds, bucket_name, file_name):
         return bucket_files[file_name]
     except KeyError as e:
         msg = "Unable to get file info."
-        msg += " AccountID=\"" + str(account_id) + "\""
+        msg += " AccountID=\"" + str(creds.account_id) + "\""
         msg += ", bucketName=\"" + bucket_name + "\""
         msg += ", fileName=\"" + file_name + "\"."
         raise BackblazeB2Error(msg) from e
