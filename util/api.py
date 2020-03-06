@@ -39,42 +39,29 @@ def list_all_unfinished_large_files(creds, bucket_id):
 
     return BackblazeB2Api.ListUnfinishedLargeFilesResult(complete_list, None)
 
-def send_request(url, method, headers, body, download_part=False):
+def send_request(url, method, headers, body, good_status_codes = None):
     try:
         response = util.http.send_request(url, method, headers, body)
 
-        if http.HTTPStatus.UNAUTHORIZED == response.status_code:
+        if None == good_status_codes:
+            good_status_codes = [http.HTTPStatus.OK]
+
+        if response.status_code in good_status_codes:
+            return response
+        elif http.HTTPStatus.UNAUTHORIZED == response.status_code:
             resp_body = json.loads(str(object=response.resp_body,
                                        encoding='utf-8'))
             if "expired_auth_token" == resp_body["code"]:
                 raise BackblazeB2ExpiredAuthError(str(response))
-
-        if download_part:
-            if ((http.HTTPStatus.OK != response.status_code)
-                and (http.HTTPStatus.PARTIAL_CONTENT != response.status_code)):
-
-                msg = "Bad HTTP response status code "
-                msg += str(response.status_code) + "."
-                msg += " " + str(response)
-                raise BackblazeB2Error(msg)
+            else:
+                raise BackblazeB2UnauthorizedError(str(response))
+        elif http.HTTPStatus.BAD_REQUEST == response.status_code:
+            raise BackblazeB2BadRequestError(str(response))
         else:
-            if http.HTTPStatus.BAD_REQUEST == response.status_code:
-                msg = "Bad request sent."
-                msg += " " + str(response)
-                raise BackblazeB2BadRequestError(msg)
-            if http.HTTPStatus.OK != response.status_code:
-                msg = "Bad HTTP response status code "
-                msg += str(response.status_code) + "."
-                msg += " " + str(response)
-                raise BackblazeB2Error(msg)
-
-        if download_part:
-            return response.resp_body
-        else:
-            return json.loads(str(object=response.resp_body, encoding='utf-8'))
-    except json.JSONDecodeError as e:
-        msg = "Malformed JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
-    except KeyError as e:
-        msg = "Missing key from response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+            msg = "Unhandled HTTP response status code."
+            msg += " StatusCode=" + str(response.status_code)
+            msg += ", Response=\"" + str(response) + "\"."
+            raise BackblazeB2ApiParseError(msg)
+    except (json.JSONDecodeError, KeyError) as e
+        msg = "ApiResponse=\"" + str(response) + "\"."
+        raise BackblazeB2ApiParseError(msg) from e
