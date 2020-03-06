@@ -45,11 +45,10 @@ def gen_fraction_percent_str(numerator, denominator):
 
 def get_bucket_id_from_name(creds, bucket_name):
     buckets = BackblazeB2Api.list_buckets(creds, bucket_name)
-    try:
+    if bucket_name in buckets:
         return buckets[bucket_name]
-    except KeyError as e:
-        raise BackblazeB2Error("No bucket ID found for bucket name \""
-                               + bucket_name + "\".") from e
+    else:
+        return None
 
 def get_cred_from_default_file():
     cred_file_path = pathlib.Path.home() / ".bbb2_cred.json"
@@ -81,15 +80,10 @@ def get_cred_from_default_file():
 def get_file_info(creds, bucket_name, file_name):
     bucket_id = get_bucket_id_from_name(creds, bucket_name)
     bucket_files = BackblazeB2Api.list_file_names(creds, bucket_id)
-
-    try:
+    if file_name in bucket_files:
         return bucket_files[file_name]
-    except KeyError as e:
-        msg = "Unable to get file info."
-        msg += " AccountID=\"" + str(creds.account_id) + "\""
-        msg += ", bucketName=\"" + bucket_name + "\""
-        msg += ", fileName=\"" + file_name + "\"."
-        raise BackblazeB2Error(msg) from e
+    else:
+        return None
 
 def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                     uploaded_parts):
@@ -195,8 +189,8 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
     bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
     if None == bucket_id:
-        raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
-                               + "\".")
+        raise BackblazeB2Error("Unable to find bucket name"
+                               + " \"" + bucket_name + "\".")
 
     vals = BackblazeB2Api.get_upload_url(creds.api_url, creds.auth_token,
                                          bucket_id)
