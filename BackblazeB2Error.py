@@ -2,6 +2,10 @@ class BackblazeB2Error(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class BackblazeB2InternalError(BackblazeB2Error):
+    def __init__(self, message):
+        super().__init__(message)
+
 class BackblazeB2BadRequestError(BackblazeB2Error):
     def __init__(self, message):
         super().__init__(message)
