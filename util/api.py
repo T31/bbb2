@@ -62,6 +62,6 @@ def send_request(url, method, headers, body, good_status_codes = None):
             msg += " StatusCode=" + str(response.status_code)
             msg += ", Response=\"" + str(response) + "\"."
             raise BackblazeB2ApiParseError(msg)
-    except (json.JSONDecodeError, KeyError) as e
+    except (json.JSONDecodeError, KeyError) as e:
         msg = "ApiResponse=\"" + str(response) + "\"."
         raise BackblazeB2ApiParseError(msg) from e
