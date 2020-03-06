@@ -173,13 +173,13 @@ def list_buckets(creds, bucket_name = None):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
     try:
+        resp_body = json.loads(response.resp_body)
         ret_val = dict()
-        for bucket in response["buckets"]:
+        for bucket in resp_body["buckets"]:
             ret_val[bucket["bucketName"]] = bucket["bucketId"]
         return ret_val
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackblazeB2ApiParseError(str(response)) from e
 
 def list_file_names(creds, bucket_id):
     local_api_url = copy.deepcopy(creds.api_url)
