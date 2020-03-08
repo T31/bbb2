@@ -1,7 +1,6 @@
 import copy
 import log
 import os
-import time
 
 import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2Error
@@ -103,8 +102,6 @@ class BackblazeB2Client:
                 out_file = open(file=dst_file_path, mode='wb')
 
             while bytes_downloaded < src_file_len:
-                time.sleep(1)
-
                 start_idx_inc = bytes_downloaded
                 end_idx_inc = bytes_downloaded + chunk_len
                 if end_idx_inc > src_file_len:

@@ -1,7 +1,6 @@
 import json
 import os
 import pathlib
-import time
 
 import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2ConnectError
@@ -126,8 +125,6 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     part = util.util.read_file_chunk(src_file, part_len)
     consecutive_failures = 0
     while len(part) > 0:
-        time.sleep(1)
-
         if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
             raise BackblazeB2ServerError("Max consecutive failures reached.")
 
