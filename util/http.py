@@ -2,7 +2,7 @@ import enum
 import http.client
 
 from BackblazeB2Error import BackblazeB2ConnectError
-from BackblazeB2Error import BackblazeB2Error
+from BackblazeB2Error import BackblazeB2InternalError
 
 class Protocol(enum.Enum):
     HTTP = 0
@@ -191,8 +191,8 @@ def send_request(url, method, headers, body):
             cached_connection.connection \
             = http.client.HTTPSConnection(host=str(url.domain))
         else:
-            raise BackblazeB2Error("Invalid protocol value in URL ("
-                                   + str(url.protocol) + ")")
+            raise BackblazeB2InternalError("Invalid protocol value in URL"
+                                           + " (" + str(url) + ").")
     try:
         if Method.GET == method:
             cached_connection.connection.request(method='GET', url=str(url),
@@ -201,8 +201,8 @@ def send_request(url, method, headers, body):
             cached_connection.connection.request(method='POST', url=str(url),
                                                  headers=headers, body=body)
         else:
-            raise BackblazeB2Error("Invalid HTTP method value"
-                                   + " (" + str(method) + ")")
+            raise BackblazeB2InternalError("Invalid HTTP method value"
+                                           + " (" + str(method) + ").")
 
         response = cached_connection.connection.getresponse()
         resp_body = response.read()
@@ -216,8 +216,3 @@ def send_request(url, method, headers, body):
         msg += ", req_headers=\"" + str(headers) + "\""
         msg += ", req_body=\"" + str(body) + "\"."
         raise BackblazeB2ConnectError(msg) from e
-
-if "__main__" == __name__:
-    u = Url(Protocol.HTTP, [], [])
-    u.from_string("https://asdf.asdf.asdf/")
-    print(str(u))

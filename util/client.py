@@ -45,11 +45,10 @@ def gen_fraction_percent_str(numerator, denominator):
 
 def get_bucket_id_from_name(creds, bucket_name):
     buckets = BackblazeB2Api.list_buckets(creds, bucket_name)
-    try:
+    if bucket_name in buckets:
         return buckets[bucket_name]
-    except KeyError as e:
-        raise BackblazeB2Error("No bucket ID found for bucket name \""
-                               + bucket_name + "\".") from e
+    else:
+        return None
 
 def get_cred_from_default_file():
     cred_file_path = pathlib.Path.home() / ".bbb2_cred.json"
@@ -81,19 +80,13 @@ def get_cred_from_default_file():
 def get_file_info(creds, bucket_name, file_name):
     bucket_id = get_bucket_id_from_name(creds, bucket_name)
     bucket_files = BackblazeB2Api.list_file_names(creds, bucket_id)
-
-    try:
+    if file_name in bucket_files:
         return bucket_files[file_name]
-    except KeyError as e:
-        msg = "Unable to get file info."
-        msg += " AccountID=\"" + str(creds.account_id) + "\""
-        msg += ", bucketName=\"" + bucket_name + "\""
-        msg += ", fileName=\"" + file_name + "\"."
-        raise BackblazeB2Error(msg) from e
+    else:
+        return None
 
 def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                     uploaded_parts):
-    consecutive_failures = 0
 
     file_len = util.util.get_file_len_bytes(src_file_path)
 
@@ -106,7 +99,6 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
     uploaded_parts = check_for_upload_parts(creds, dst_bucket_name,
                                             dst_file_name)
-
     file_id = uploaded_parts.file_id
     if None == file_id:
         dst_bucket_id = get_bucket_id_from_name(creds, dst_bucket_name)
@@ -125,70 +117,80 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     upload_url.from_string(upload_creds["upload_part_url"])
     upload_auth_token = upload_creds["upload_part_auth_token"]
 
+    # BackblazeB2 documentation says 5 consecutive failures implies something is
+    # wrong on their end.
+    MAX_CONSECUTIVE_FAILURES = 5
+
     total_bytes_uploaded = 0
     part_num = 1
     part = util.util.read_file_chunk(src_file, part_len)
+    consecutive_failures = 0
     while len(part) > 0:
-        # BackblazeB2 documentation says 5 consecutive failures implies
-        # something wrong on their end.
-        if 5 <= consecutive_failures:
-            log.log_error("Max consecutive upload failures reached. Aborting.")
-            return False
+        time.sleep(1)
+
+        if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+            raise BackblazeB2ServerError("Max consecutive failures reached.")
 
         part_sha1 = util.util.calc_sha1(part)
 
-        if ((part_num in uploaded_parts.uploaded_parts)
-            and (len(part) == uploaded_parts.uploaded_parts[part_num].content_len)
-            and (part_sha1 == uploaded_parts.uploaded_parts[part_num].sha1)):
+        if (part_num in uploaded_parts.uploaded_parts):
+            expected_len = uploaded_parts.uploaded_parts[part_num].content_len
+            expected_sha1 = uploaded_parts.uploaded_parts[part_num].sha1
 
-            log.log_info("Part " + str(part_num) + " already uploaded.")
+            if ((len(part) == expected_len) and (part_sha1 == expected_sha1)):
+                log.log_info("Part " + str(part_num) + " already uploaded.")
 
-            part_num += 1
-            total_bytes_uploaded += len(part)
-            part = util.util.read_file_chunk(src_file, part_len)
-            continue
-
-        try:
-            time.sleep(1)
-            result = BackblazeB2Api.upload_part(upload_url, upload_auth_token,
-                                                part_num, part)
-            consecutive_failures = 0
-
-            if part_sha1 != result["sha1_hash"]:
-                log.log_warning("SHA1 mismatch. Retrying.")
+                part_num += 1
+                total_bytes_uploaded += len(part)
+                part = util.util.read_file_chunk(src_file, part_len)
                 continue
 
-            total_bytes_uploaded += len(part)
-            part_record = BackblazeB2Api.UploadPart(part_num, len(part),
-                                                    part_sha1)
-
-            uploaded_parts.uploaded_parts[part_num] = part_record
-
-            log.log_info("Part uploaded. "
-                         + gen_fraction_percent_str(total_bytes_uploaded,
-                                                    file_len) + ".")
-
-            part_num += 1
-            part = util.util.read_file_chunk(src_file, part_len)
-        except (BackblazeB2ConnectError, BackblazeB2ExpiredAuthError) as e:
+        result = None
+        try:
+            result = BackblazeB2Api.upload_part(upload_url,
+                                                upload_auth_token, part_num,
+                                                part)
+            consecutive_failures = 0
+        except (BackblazeB2ConnectError, BackblazeB2ExpiredAuthError):
             consecutive_failures += 1
+
+        # Refresh the upload URL outside of "except" block because it has chance
+        # to throw another exception. Throwing exception inside of an "except"
+        # block crashes the whole program.
+        if consecutive_failures > 0:
             log.log_warning("Refreshing upload URL.")
-            results = BackblazeB2Api.get_upload_part_url(creds, file_id)
-            upload_url.from_string(results["upload_part_url"])
-            upload_auth_token = results["upload_part_auth_token"]
+            new_url = BackblazeB2Api.get_upload_part_url(creds, file_id)
+            upload_url.from_string(new_url["upload_part_url"])
+            upload_auth_token = new_url["upload_part_auth_token"]
+            continue
+
+        if part_sha1 != result["sha1_hash"]:
+            log.log_warning("SHA1 mismatch. Retrying.")
+            continue
+
+        total_bytes_uploaded += len(part)
+        part_record = BackblazeB2Api.UploadPart(part_num, len(part),
+                                                part_sha1)
+
+        uploaded_parts.uploaded_parts[part_num] = part_record
+
+        log.log_info("Part uploaded. "
+                     + gen_fraction_percent_str(total_bytes_uploaded,
+                                                file_len) + ".")
+        part_num += 1
+        part = util.util.read_file_chunk(src_file, part_len)
 
     part_hashes = []
     for i in range(1, part_num):
         part_hashes.append(uploaded_parts.uploaded_parts[i].sha1)
 
     BackblazeB2Api.finish_large_file(creds, file_id, part_hashes)
-    return True
 
 def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
     bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
     if None == bucket_id:
-        raise BackblazeB2Error("Unable to find bucket name \"" + bucket_name
-                               + "\".")
+        raise BackblazeB2Error("Unable to find bucket name"
+                               + " \"" + bucket_name + "\".")
 
     vals = BackblazeB2Api.get_upload_url(creds.api_url, creds.auth_token,
                                          bucket_id)

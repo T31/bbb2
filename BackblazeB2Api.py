@@ -4,6 +4,7 @@ import http
 import hashlib
 import json
 
+from BackblazeB2Error import BackblazeB2ApiParseError
 from BackblazeB2Error import BackblazeB2Error
 import util.api
 import util.http
@@ -59,16 +60,16 @@ def authorize(key_id, application_key):
 
     response = util.api.send_request(AUTH_URL, util.http.Method.GET, headers,
                                      None)
+    resp_json = json.loads(response.resp_body)
     try:
-        return {"account_id" : response["accountId"],
-                "auth_token" : response["authorizationToken"],
-                "api_url" : response["apiUrl"],
-                "download_url" : response["downloadUrl"],
-                "min_part_size_bytes" : response["absoluteMinimumPartSize"],
-                "rec_part_size_bytes" : response["recommendedPartSize"]}
-    except KeyError as e:
-        msg = "Response missing key."
-        raise BackblazeB2Error(msg) from e
+        return {"account_id" : resp_json["accountId"],
+                "auth_token" : resp_json["authorizationToken"],
+                "api_url" : resp_json["apiUrl"],
+                "download_url" : resp_json["downloadUrl"],
+                "min_part_size_bytes" : resp_json["absoluteMinimumPartSize"],
+                "rec_part_size_bytes" : resp_json["recommendedPartSize"]}
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackblazeB2ApiParseError(str(response)) from e
 
 def cancel_large_file(creds, file_id):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -77,8 +78,7 @@ def cancel_large_file(creds, file_id):
 
     headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"fileId" : file_id})
-    response = util.api.send_request(local_api_url, util.http.Method.POST,
-                                     headers, body)
+    util.api.send_request(local_api_url, util.http.Method.POST, headers, body)
 
 def copy_file(api_url, auth_token, src_file_id, dst_bucket_id, dst_file_name):
     local_api_url = copy.deepcopy(api_url)
@@ -92,8 +92,7 @@ def copy_file(api_url, auth_token, src_file_id, dst_bucket_id, dst_file_name):
         body["destinationBucketId"] = dst_bucket_id
     body = json.dumps(body)
 
-    response = util.api.send_request(local_api_url, util.http.Method.POST,
-                                     headers, body)
+    util.api.send_request(local_api_url, util.http.Method.POST, headers, body)
 
 def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
     local_download_url = copy.deepcopy(creds.download_url)
@@ -136,12 +135,12 @@ def get_upload_part_url(creds, file_id):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
     try:
-        return {"upload_part_url" : response["uploadUrl"],
-                "upload_part_auth_token" : response["authorizationToken"],
-                "file_id" : response["fileId"]}
-    except KeyError as e:
-        msg = "Failed to find key in JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        resp_json = json.loads(response.resp_body)
+        return {"upload_part_url" : resp_json["uploadUrl"],
+                "upload_part_auth_token" : resp_json["authorizationToken"],
+                "file_id" : resp_json["fileId"]}
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackblazeB2ApiParseError(str(response)) from e
 
 def get_upload_url(api_url, auth_token, bucket_id):
     local_api_url = copy.deepcopy(api_url)
@@ -175,13 +174,13 @@ def list_buckets(creds, bucket_name = None):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
     try:
+        resp_body = json.loads(response.resp_body)
         ret_val = dict()
-        for bucket in response["buckets"]:
+        for bucket in resp_body["buckets"]:
             ret_val[bucket["bucketName"]] = bucket["bucketId"]
         return ret_val
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackblazeB2ApiParseError(str(response)) from e
 
 def list_file_names(creds, bucket_id):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -216,17 +215,18 @@ def list_parts(creds, file_id, start_part = None):
     try:
         response = util.api.send_request(local_api_url, util.http.Method.POST,
                                          headers, body)
+        resp_json = json.loads(response.resp_body)
+
         upload_parts = dict()
 
-        for part in response["parts"]:
+        for part in resp_json["parts"]:
             upload_part = UploadPart(part["partNumber"], part["contentLength"],
                                      part["contentSha1"])
             upload_parts[int(part["partNumber"])] = upload_part
 
-        return ListPartsResult(upload_parts, response["nextPartNumber"])
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return ListPartsResult(upload_parts, resp_json["nextPartNumber"])
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackblazeB2ApiParseError(str(response)) from e
 
 def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -243,16 +243,17 @@ def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
     try:
         response = util.api.send_request(local_api_url, util.http.Method.POST,
                                          headers, body)
+        resp_json = json.loads(response.resp_body)
 
         file_list = []
-        for file in response["files"]:
+        for file in resp_json["files"]:
             file_list.append(UnfinishedLargeFile(file["fileId"],
-                                                  file["fileName"]))
+                                                 file["fileName"]))
 
-        return ListUnfinishedLargeFilesResult(file_list, response["nextFileId"])
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return ListUnfinishedLargeFilesResult(file_list,
+                                              resp_json["nextFileId"])
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackblazeB2ApiParseError(str(response)) from e
 
 def start_large_file(creds, bucket_id, dst_file_name):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -312,9 +313,9 @@ def upload_part(upload_url, auth_token, part_num, part):
 
     response = util.api.send_request(upload_url, util.http.Method.POST, headers,
                                      body)
+    resp_body = json.loads(response.resp_body)
     try:
-        return {"part_number" : response["partNumber"],
-                "sha1_hash" : hasher.hexdigest()}
-    except KeyError as e:
-        msg = "Failed to find key in JSON response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        return {"part_number" : resp_body["partNumber"],
+                "sha1_hash" : resp_body["contentSha1"]}
+    except (json.JSONDecodeError, KeyError) as e:
+        raise BackblazeB2Error(str(response)) from e
