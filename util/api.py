@@ -40,12 +40,10 @@ def list_all_unfinished_large_files(creds, bucket_id):
 
     return BackblazeB2Api.ListUnfinishedLargeFilesResult(complete_list, None)
 
-def send_request(url, method, headers, body, good_status_codes = None):
+def send_request(url, method, headers, body,
+                 good_status_codes = [http.HTTPStatus.OK]):
     try:
         response = util.http.send_request(url, method, headers, body)
-
-        if None == good_status_codes:
-            good_status_codes = [http.HTTPStatus.OK]
 
         if response.status_code in good_status_codes:
             return response
@@ -64,5 +62,4 @@ def send_request(url, method, headers, body, good_status_codes = None):
             msg += ", Response=\"" + str(response) + "\"."
             raise BackblazeB2ApiParseError(msg)
     except (json.JSONDecodeError, KeyError) as e:
-        msg = "ApiResponse=\"" + str(response) + "\"."
-        raise BackblazeB2ApiParseError(msg) from e
+        raise BackblazeB2ApiParseError(str(response)) from e
