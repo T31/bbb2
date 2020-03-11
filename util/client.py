@@ -6,6 +6,7 @@ import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2ConnectError
 from BackblazeB2Error import BackblazeB2Error
 from BackblazeB2Error import BackblazeB2ExpiredAuthError
+from BackblazeB2Error import BackblazeB2ServerError
 import log
 import util
 
