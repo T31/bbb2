@@ -5,6 +5,7 @@ import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2ApiParseError
 from BackblazeB2Error import BackblazeB2BadRequestError
 from BackblazeB2Error import BackblazeB2ExpiredAuthError
+from BackblazeB2Error import BackblazeB2RemoteError
 from BackblazeB2Error import BackblazeB2UnauthorizedError
 import util.http
 
@@ -56,6 +57,8 @@ def send_request(url, method, headers, body,
                 raise BackblazeB2UnauthorizedError(str(response))
         elif http.HTTPStatus.BAD_REQUEST == response.status_code:
             raise BackblazeB2BadRequestError(str(response))
+        elif http.HTTPStatus.INTERNAL_SERVER_ERROR == response.status_code:
+            raise BackblazeB2RemoteError(str(response))
         else:
             msg = "Unhandled HTTP response status code."
             msg += " StatusCode=" + str(response.status_code)

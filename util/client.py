@@ -149,7 +149,8 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                                                 upload_auth_token, part_num,
                                                 part)
             consecutive_failures = 0
-        except (BackblazeB2ConnectError, BackblazeB2ExpiredAuthError):
+        except (BackblazeB2ConnectError, BackblazeB2ExpiredAuthError,
+                BackblazeB2RemoteError):
             consecutive_failures += 1
 
         # Refresh the upload URL outside of "except" block because it has chance
