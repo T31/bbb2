@@ -22,7 +22,7 @@ class BackblazeB2InternalError(BackblazeB2Error):
     def __init__(self, message):
         super().__init__(message)
 
-class BackblazeB2ServerError(BackblazeB2Error):
+class BackblazeB2RemoteError(BackblazeB2Error):
     def __init__(self, message):
         super().__init__(message)
 

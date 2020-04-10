@@ -6,7 +6,7 @@ import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2ConnectError
 from BackblazeB2Error import BackblazeB2Error
 from BackblazeB2Error import BackblazeB2ExpiredAuthError
-from BackblazeB2Error import BackblazeB2ServerError
+from BackblazeB2Error import BackblazeB2RemoteError
 import log
 import util
 
@@ -127,7 +127,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     consecutive_failures = 0
     while len(part) > 0:
         if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
-            raise BackblazeB2ServerError("Max consecutive failures reached.")
+            raise BackblazeB2RemoteError("Max consecutive failures reached.")
 
         part_sha1 = util.util.calc_sha1(part)
 
