@@ -1,6 +1,7 @@
 import copy
 import log
 import os
+import random
 
 import BackblazeB2Api
 from BackblazeB2Error import BackblazeB2Error
@@ -144,6 +145,15 @@ class BackblazeB2Client:
                                                 bucket_name, dst_file_name,
                                                 uploaded_parts)
                     return
-                except BackblazeB2ExpiredAuthError as e:
+                except BackblazeB2ExpiredAuthError:
                     log.log_warning("Reauthorizing.")
                     self.authorize()
+                except BackblazeB2RemoteError as e:
+                    exc_msg = e.__class__.__name__ + ": " + str(e)
+                    seconds = random.randrange(60, 300)
+                    msg = "Backblaze server error. " + exc_msg + "."
+                          + " Sleeping for " + str(seconds) + " seconds."
+
+                    log.log_warning(msg)
+                    sleep(seconds)
+                    continue
