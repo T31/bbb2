@@ -85,6 +85,26 @@ def get_file_info(creds, bucket_name, file_name):
     else:
         return None
 
+class SkipAlreadyUploadedResults:
+    cur_part_num
+    bytes_already_uploaded
+
+    def __init__(self, cur_part_num, bytes_already_uploaded):
+        self.cur_part_num = cur_part_num
+        self.bytes_already_uploaded = bytes_already_uploaded
+
+def skip_already_uploaded(file_stream, uploaded_parts):
+    bytes_already_uploaded = 0
+    cur_part_num = 1
+    while cur_part_num in uploaded_parts.uploaded_parts:
+        cur_part = uploaded_parts.uploaded_parts[cur_part_num]
+
+        bytes_already_uploaded += cur_part.content_len
+        cur_part_num += 1
+
+    file_stream.seek(bytes_already_uploaded)
+    return SkipAlreadyUploadedResults(cur_part_num, bytes_already_uploaded)
+
 def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                     uploaded_parts):
 
@@ -112,6 +132,12 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
     src_file = util.util.open_binary_read_file(src_file_path)
 
+    results = skip_already_uploaded(src_file)[0]
+    part_num = results.cur_part_num
+    total_bytes_uploaded = results.bytes_already_uploaded
+
+    log.log_info("Starting from part number " + str(part_num) + ".")
+
     upload_creds = BackblazeB2Api.get_upload_part_url(creds, file_id)
     upload_url = util.http.Url(None, None, None)
     upload_url.from_string(upload_creds["upload_part_url"])
@@ -121,8 +147,6 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     # wrong on their end.
     MAX_CONSECUTIVE_FAILURES = 5
 
-    total_bytes_uploaded = 0
-    part_num = 1
     part = util.util.read_file_chunk(src_file, part_len)
     consecutive_failures = 0
     while len(part) > 0:
@@ -130,18 +154,6 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
             raise BackblazeB2RemoteError("Max consecutive failures reached.")
 
         part_sha1 = util.util.calc_sha1(part)
-
-        if (part_num in uploaded_parts.uploaded_parts):
-            expected_len = uploaded_parts.uploaded_parts[part_num].content_len
-            expected_sha1 = uploaded_parts.uploaded_parts[part_num].sha1
-
-            if ((len(part) == expected_len) and (part_sha1 == expected_sha1)):
-                log.log_info("Part " + str(part_num) + " already uploaded.")
-
-                part_num += 1
-                total_bytes_uploaded += len(part)
-                part = util.util.read_file_chunk(src_file, part_len)
-                continue
 
         result = None
         try:
