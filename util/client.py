@@ -86,8 +86,8 @@ def get_file_info(creds, bucket_name, file_name):
         return None
 
 class SkipAlreadyUploadedResults:
-    cur_part_num
-    bytes_already_uploaded
+    cur_part_num = 1
+    bytes_already_uploaded = 0
 
     def __init__(self, cur_part_num, bytes_already_uploaded):
         self.cur_part_num = cur_part_num
@@ -107,16 +107,6 @@ def skip_already_uploaded(file_stream, uploaded_parts):
 
 def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                     uploaded_parts):
-
-    file_len = util.util.get_file_len_bytes(src_file_path)
-
-    part_len = creds.recommended_upload_part_bytes
-    if (file_len > (creds.recommended_upload_part_bytes
-                    * creds.MAX_UPLOAD_PARTS)):
-        part_len = file_len // (creds.MAX_UPLOAD_PARTS - 1)
-
-    log.log_info("Part length is " + str(part_len) + ".")
-
     uploaded_parts = check_for_upload_parts(creds, dst_bucket_name,
                                             dst_file_name)
     file_id = uploaded_parts.file_id
@@ -132,11 +122,21 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
     src_file = util.util.open_binary_read_file(src_file_path)
 
-    results = skip_already_uploaded(src_file)[0]
+    results = skip_already_uploaded(src_file, uploaded_parts)
     part_num = results.cur_part_num
     total_bytes_uploaded = results.bytes_already_uploaded
-
     log.log_info("Starting from part number " + str(part_num) + ".")
+
+    file_len = util.util.get_file_len_bytes(src_file_path)
+    remaining_file_len = file_len - total_bytes_uploaded
+    remaining_parts = creds.MAX_UPLOAD_PARTS - part_num + 1
+
+    part_len = creds.recommended_upload_part_bytes
+    if (remaining_file_len > (remaining_parts
+                              * creds.recommended_upload_part_bytes)):
+        part_len = (remaining_file_len // remaining_parts) + 1
+
+    log.log_info("Part length is " + str(part_len) + ".")
 
     upload_creds = BackblazeB2Api.get_upload_part_url(creds, file_id)
     upload_url = util.http.Url(None, None, None)
