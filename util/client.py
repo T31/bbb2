@@ -191,11 +191,17 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
         part_num += 1
         part = util.util.read_file_chunk(src_file, part_len)
 
-    part_hashes = []
-    for i in range(1, part_num):
-        part_hashes.append(uploaded_parts.uploaded_parts[i].sha1)
+    bad_part = verify_uploaded_parts(src_file_path, uploaded_parts)
+    if 0 == bad_part:
+        part_hashes = []
+        for i in range(1, part_num):
+            part_hashes.append(uploaded_parts.uploaded_parts[i].sha1)
 
-    BackblazeB2Api.finish_large_file(creds, file_id, part_hashes)
+        BackblazeB2Api.finish_large_file(creds, file_id, part_hashes)
+    else:
+        log.log_warning("Bad part detected!"
+                        + " Recommending to restart the upload from scratch."
+                        + " BadPartNum=" + str(bad_part) + ".")
 
 def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
     bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
@@ -220,3 +226,46 @@ def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
     msg += ", BucketId=\"" + results["bucket_id"] + "\""
     msg += ", FileHashSha1=\"" + results["hash_sha1"] + "\"."
     print(msg)
+
+# Returns zero if all uploaded part checksums match and if the whole file is
+# covered by the parts. Else, returns the earliest part number which failed
+# verification. If there is a file length mismatch, assume the very first part
+# is invalid. A file length mismatch is nigh impossible however due to the fact
+# that the checksums would probably fail to match first.
+def verify_uploaded_parts(file_path, uploaded_parts):
+    exception_cur_part_num = 0
+
+    file_stream = util.util.open_binary_read_file(file_path)
+    try:
+        bytes_uploaded = 0
+        for cur_part_num in range(1, len(uploaded_parts.uploaded_parts) + 1):
+            exception_cur_part_num = cur_part_num
+
+            cur_part = uploaded_parts.uploaded_parts[cur_part_num]
+
+            file_part = util.util.read_file_chunk(file_stream,
+                                                  cur_part.content_len)
+            file_part_sha1 = util.util.calc_sha1(file_part)
+
+            if ((file_part_sha1 != cur_part.sha1)
+                or (len(file_part) != cur_part.content_len)):
+                return cur_part_num
+
+            log.log_info("Part " + str(cur_part_num) + " verified.")
+            bytes_uploaded += cur_part.content_len
+
+        file_len = util.util.get_file_len_bytes(file_path)
+        if bytes_uploaded != file_len:
+            log.log_warning("File length mismatch in uploaded parts."
+                            + " LocalFileLen=" + str(file_len) + "."
+                            + " UploadedPartsLen=" + str(bytes_uploaded) + ".")
+            return 1
+
+        return 0
+    except KeyError:
+        msg = ("Part missing from uploaded part range."
+               + " MissingPartNum=" + str(exception_cur_part_num) + ".")
+        log.log_warning(msg)
+        return exception_cur_part_num
+    finally:
+        file_stream.close()
