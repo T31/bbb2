@@ -12,7 +12,8 @@ import util.http
 def list_all_parts(creds, file_id):
     result_list = [BackblazeB2Api.list_parts(creds, file_id)]
 
-    while None != result_list[-1].next_part:
+    while ((None != result_list[-1].next_part)
+            and (result_list[-1].next_part <= creds.MAX_UPLOAD_PARTS)):
         result = BackblazeB2Api.list_parts(creds, file_id,
                                            result_list[-1].next_part)
         result_list.append(result)
