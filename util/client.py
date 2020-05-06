@@ -38,11 +38,6 @@ def check_for_upload_parts(creds, bucket_name, file_name):
     upload_parts = util.api.list_all_parts(creds, file_id).upload_parts
     return UnfinishedUpload(file_id, file_name, upload_parts)
 
-def gen_fraction_percent_str(numerator, denominator):
-    fraction = str(numerator) + "/" + str(denominator)
-    percent = str(numerator / denominator) + "%"
-    return fraction + " (" + percent + ")"
-
 def get_bucket_id_from_name(creds, bucket_name):
     buckets = BackblazeB2Api.list_buckets(creds, bucket_name)
     if bucket_name in buckets:
@@ -186,8 +181,9 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
         uploaded_parts.uploaded_parts[part_num] = part_record
 
         log.log_info("Part uploaded. "
-                     + gen_fraction_percent_str(total_bytes_uploaded,
-                                                file_len) + ".")
+                     + util.gen_fraction_percent_str(total_bytes_uploaded,
+                                                     file_len)
+                     + ".")
         part_num += 1
         part = util.util.read_file_chunk(src_file, part_len)
 

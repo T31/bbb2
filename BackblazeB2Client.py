@@ -85,10 +85,14 @@ class BackblazeB2Client:
         BackblazeB2Api.copy_file(self.api_url, self.auth_token, src_file_id,
                                  dst_bucket_id, dst_file_name)
 
-    def download_file(self, src_bucket_name, src_file_name, dst_file_path):
+    def download_file(self, src_bucket_name, src_file_path, dst_file_path):
+        log.log_info("Downloading file \"" + src_file_path + "\""
+                     + " from bucket \"" + src_bucket_name + "\""
+                     + " to path \"" + dst_file_path + "\".")
+
         src_file_info = util.client.get_file_info(self.credentials,
                                                   src_bucket_name,
-                                                  src_file_name)
+                                                  src_file_path)
         src_file_id = src_file_info["fileId"]
         src_file_len = src_file_info["contentLength"]
         bytes_downloaded = 0
@@ -109,13 +113,16 @@ class BackblazeB2Client:
                 if end_idx_inc > src_file_len:
                     end_idx_inc = src_file_len - 1
 
-                data = BackblazeB2Api.download_file_by_id(self.credentials,
-                                                          src_file_id,
-                                                          start_idx_inc,
-                                                          end_idx_inc)
-                out_file.write(data)
-                bytes_downloaded += len(data)
-                log.log_info("Bytes downloaded: " + str(bytes_downloaded))
+                result = BackblazeB2Api.download_file_by_id(self.credentials,
+                                                            src_file_id,
+                                                            start_idx_inc,
+                                                            end_idx_inc)
+                out_file.write(result.payload)
+                bytes_downloaded += len(result.payload)
+
+                percent = util.util.gen_fraction_percent_str(bytes_downloaded,
+                                                             src_file_len)
+                log.log_info("Downloading. " + percent + ".")
         finally:
             if None != out_file:
                 out_file.close()

@@ -12,6 +12,11 @@ def get_file_len_bytes(file_path):
                " SrcFilePath=\"" + str(file_path) + "\".")
         raise BackblazeB2Error(msg) from e
 
+def gen_fraction_percent_str(numerator, denominator):
+    fraction = str(numerator) + "/" + str(denominator)
+    percent = str(numerator / denominator) + "%"
+    return fraction + " (" + percent + ")"
+
 def calc_sha1(data):
     hasher = hashlib.sha1()
     hasher.update(data)

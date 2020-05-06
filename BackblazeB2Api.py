@@ -94,6 +94,18 @@ def copy_file(api_url, auth_token, src_file_id, dst_bucket_id, dst_file_name):
 
     util.api.send_request(local_api_url, util.http.Method.POST, headers, body)
 
+class DownloadFileByIdResult:
+    file_id = None
+    content_len = None
+    sha1 = None
+    payload = None
+
+    def __init__(self, file_id, content_len, sha1, payload,):
+        self.file_id = file_id
+        self.content_len = content_len
+        self.sha1 = sha1
+        self.payload = payload
+
 def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
     local_download_url = copy.deepcopy(creds.download_url)
 
@@ -105,8 +117,17 @@ def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
     headers = {"Authorization" : creds.auth_token, "Range" : range_str}
     body = json.dumps({"fileId" : file_id})
     good_status_codes = [http.HTTPStatus.OK, http.HTTPStatus.PARTIAL_CONTENT]
-    return util.api.send_request(local_download_url, util.http.Method.POST,
-                                 headers, body, good_status_codes)
+    response = util.api.send_request(local_download_url, util.http.Method.POST,
+                                     headers, body, good_status_codes)
+
+    resp_headers = dict()
+    for header in response.resp_headers:
+        resp_headers[header[0]] = header[1]
+
+    return DownloadFileByIdResult(resp_headers["x-bz-file-id"],
+                                  resp_headers["Content-Length"],
+                                  resp_headers["x-bz-content-sha1"],
+                                  response.resp_body)
 
 def download_file_by_name(download_url, auth_token, bucket_name, file_name,
                           start_idx_inc, end_idx_inc):
@@ -193,8 +214,9 @@ def list_file_names(creds, bucket_id):
     try:
         response = util.api.send_request(local_api_url, util.http.Method.POST,
                                          headers, body)
+        resp_body = json.loads(response.resp_body)
         ret_val = dict()
-        for file in response["files"]:
+        for file in resp_body["files"]:
             entry = {"contentLength" : file["contentLength"],
                      "fileId" : file["fileId"]}
             ret_val[file["fileName"]] = entry
