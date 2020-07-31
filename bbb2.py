@@ -14,10 +14,10 @@ class ExitCode(enum.Enum):
 
 def usage_msg():
     return ("Usage : bbb2 --list-buckets [bucketName]\n"
-            + "        bbb2 --upload dstBucketName dstName srcPath\n"
-            + "        bbb2 --cancel-all-large-file-uploads\n"
-            + "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n"
-            + "        bbb2 --download srcBucketName srcFileName dstFilePath")
+            "        bbb2 --upload dstBucketName dstName srcPath\n"
+            "        bbb2 --cancel-all-large-file-uploads\n"
+            "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n"
+            "        bbb2 --download srcBucketName srcFileName dstFilePath")
 
 if "__main__" == __name__:
     try:
