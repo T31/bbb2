@@ -3,10 +3,7 @@ import os
 import pathlib
 
 import BackblazeB2Api
-from BackblazeB2Error import BackblazeB2ConnectError
-from BackblazeB2Error import BackblazeB2Error
-from BackblazeB2Error import BackblazeB2ExpiredAuthError
-from BackblazeB2Error import BackblazeB2RemoteError
+import Bbb2Error
 import log
 import util
 
@@ -55,7 +52,7 @@ def get_cred_from_default_file():
     except OSError as e:
         msg = ("Failed to open credential file."
                + " CredFilePath=\"" + str(cred_file_path) + "\".")
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
     try:
         cred_file_contents = json.load(cred_file)
@@ -64,11 +61,11 @@ def get_cred_from_default_file():
     except json.JSONDecodeError as e:
         msg = ("Failed to parse credential file."
                + " CredFilePath=\"" + str(cred_file_path) + "\".")
-        raise BackblazeB2Error(msg)
+        raise Bbb2Error.Bbb2Error(msg)
     except KeyError as e:
         msg = ("Failed to find key in credential file."
                + " CredFilePath=\"" + str(cred_file_path) + "\".")
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
     finally:
         cred_file.close()
 
@@ -146,7 +143,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     consecutive_failures = 0
     while len(part) > 0:
         if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
-            raise BackblazeB2RemoteError("Max consecutive failures reached.")
+            raise Bbb2Error.RemoteError("Max consecutive failures reached.")
 
         part_sha1 = util.util.calc_sha1(part)
 
@@ -156,8 +153,8 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
                                                 upload_auth_token, part_num,
                                                 part)
             consecutive_failures = 0
-        except (BackblazeB2ConnectError, BackblazeB2ExpiredAuthError,
-                BackblazeB2RemoteError):
+        except (Bbb2Error.ConnectError, Bbb2Error.ExpiredAuthError,
+                Bbb2Error.RemoteError):
             consecutive_failures += 1
 
         # Refresh the upload URL outside of "except" block because it has chance
@@ -202,8 +199,8 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
     bucket_id = util.client.get_bucket_id_from_name(creds, bucket_name)
     if None == bucket_id:
-        raise BackblazeB2Error("Unable to find bucket name"
-                               + " \"" + bucket_name + "\".")
+        raise Bbb2Error.Bbb2Error("Unable to find bucket name"
+                                  + " \"" + bucket_name + "\".")
 
     vals = BackblazeB2Api.get_upload_url(creds.api_url, creds.auth_token,
                                          bucket_id)

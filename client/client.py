@@ -4,9 +4,7 @@ import os
 import random
 
 import BackblazeB2Api
-from BackblazeB2Error import BackblazeB2Error
-from BackblazeB2Error import BackblazeB2ExpiredAuthError
-from BackblazeB2Error import BackblazeB2RemoteError
+import Bbb2Error
 import util.client
 import util.http
 import util.util
@@ -137,7 +135,7 @@ class BackblazeB2Client:
                      + " FileLen=" + str(file_len) + ".")
 
         if file_len > SessionCredentials.MAX_FILE_BYTES:
-            raise BackblazeB2Error("File \"" + str(src_file_path) + "\""
+            raise Bbb2Error.Bbb2Error("File \"" + str(src_file_path) + "\""
                                    + " exceeds max file bytes "
                                    + str(SessionCredentials.MAX_FILE_BYTES) + ".")
 
@@ -153,10 +151,10 @@ class BackblazeB2Client:
                                                 bucket_name, dst_file_name,
                                                 uploaded_parts)
                     return
-                except BackblazeB2ExpiredAuthError:
+                except Bbb2Error.ExpiredAuthError:
                     log.log_warning("Reauthorizing.")
                     self.authorize()
-                except BackblazeB2RemoteError as e:
+                except Bbb2Error.RemoteError as e:
                     exc_msg = e.__class__.__name__ + ": " + str(e)
                     seconds = random.randrange(60, 300)
                     msg = ("Backblaze server error. " + exc_msg + "."

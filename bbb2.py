@@ -3,8 +3,7 @@ import sys
 import traceback
 
 from BackblazeB2Client import BackblazeB2Client
-from BackblazeB2Error import BackblazeB2ConnectError
-from BackblazeB2Error import BackblazeB2Error
+import Bbb2Error
 import log
 
 class ExitCode(enum.Enum):
@@ -79,14 +78,14 @@ if "__main__" == __name__:
                     client.download_file(src_bucket_name, src_file_name,
                                          dst_file_path)
                     break
-                except BackblazeB2ConnectError as e:
+                except Bbb2Error.ConnectError as e:
                     log.log_warning("Connect error during download."
                                     + " Reauthorizing.")
         else:
             print("Unrecognized args.\n"
                   + usage_msg())
             sys.exit(ExitCode.USER_ERROR)
-    except BackblazeB2Error as e:
+    except Bbb2Error.Bbb2Error as e:
         log.log_error("Aborting due to error.")
         traceback.print_exc()
         sys.exit(ExitCode.INTERNAL_ERROR)

@@ -4,8 +4,7 @@ import http
 import hashlib
 import json
 
-from BackblazeB2Error import BackblazeB2ApiParseError
-from BackblazeB2Error import BackblazeB2Error
+import Bbb2Error
 import util.api
 import util.http
 import util.util
@@ -69,7 +68,7 @@ def authorize(key_id, application_key):
                 "min_part_size_bytes" : resp_json["absoluteMinimumPartSize"],
                 "rec_part_size_bytes" : resp_json["recommendedPartSize"]}
     except (json.JSONDecodeError, KeyError) as e:
-        raise BackblazeB2ApiParseError(str(response)) from e
+        raise Bbb2Error.ApiParseError(str(response)) from e
 
 def cancel_large_file(creds, file_id):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -163,7 +162,7 @@ def get_upload_part_url(creds, file_id):
                 "upload_part_auth_token" : resp_json["authorizationToken"],
                 "file_id" : resp_json["fileId"]}
     except (json.JSONDecodeError, KeyError) as e:
-        raise BackblazeB2ApiParseError(str(response)) from e
+        raise Bbb2Error.ApiParseError(str(response)) from e
 
 def get_upload_url(api_url, auth_token, bucket_id):
     local_api_url = copy.deepcopy(api_url)
@@ -181,7 +180,7 @@ def get_upload_url(api_url, auth_token, bucket_id):
                 "upload_auth_token" : resp_body["authorizationToken"]}
     except (json.JSONDecodeError, KeyError) as e:
         msg = "Failed to parse response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
 def list_buckets(creds, bucket_name = None):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -204,7 +203,7 @@ def list_buckets(creds, bucket_name = None):
             ret_val[bucket["bucketName"]] = bucket["bucketId"]
         return ret_val
     except (json.JSONDecodeError, KeyError) as e:
-        raise BackblazeB2ApiParseError(str(response)) from e
+        raise Bbb2Error.ApiParseError(str(response)) from e
 
 def list_file_names(creds, bucket_id):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -224,7 +223,7 @@ def list_file_names(creds, bucket_id):
         return ret_val
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
 def list_parts(creds, file_id, start_part = None):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -251,7 +250,7 @@ def list_parts(creds, file_id, start_part = None):
 
         return ListPartsResult(upload_parts, resp_json["nextPartNumber"])
     except (json.JSONDecodeError, KeyError) as e:
-        raise BackblazeB2ApiParseError(str(response)) from e
+        raise Bbb2Error.ApiParseError(str(response)) from e
 
 def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -278,7 +277,7 @@ def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
         return ListUnfinishedLargeFilesResult(file_list,
                                               resp_json["nextFileId"])
     except (json.JSONDecodeError, KeyError) as e:
-        raise BackblazeB2ApiParseError(str(response)) from e
+        raise Bbb2Error.ApiParseError(str(response)) from e
 
 def start_large_file(creds, bucket_id, dst_file_name):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -298,7 +297,7 @@ def start_large_file(creds, bucket_id, dst_file_name):
         return response["fileId"]
     except KeyError as e:
         msg = "Failed to find key in response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
 def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
                 src_file_sha1=None):
@@ -325,7 +324,7 @@ def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
                 "file_name" : resp_body["fileName"]}
     except (json.JSONDecodeError, KeyError) as e:
         msg = "Failed to parse response. " + str(response)
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
 def upload_part(upload_url, auth_token, part_num, part):
     hasher = hashlib.sha1()
@@ -344,4 +343,4 @@ def upload_part(upload_url, auth_token, part_num, part):
         return {"part_number" : resp_body["partNumber"],
                 "sha1_hash" : resp_body["contentSha1"]}
     except (json.JSONDecodeError, KeyError) as e:
-        raise BackblazeB2Error(str(response)) from e
+        raise Bbb2Error.Bbb2Error(str(response)) from e

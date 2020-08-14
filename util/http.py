@@ -1,8 +1,7 @@
 import enum
 import http.client
 
-from BackblazeB2Error import BackblazeB2ConnectError
-from BackblazeB2Error import BackblazeB2InternalError
+import Bbb2Error
 
 class Protocol(enum.Enum):
     HTTP = 0
@@ -90,7 +89,7 @@ class Url:
         start_idx_inc = 0
         end_idx_ex = url_string.find("://")
         if -1 == end_idx_ex:
-            raise BackblazeB2Error("Malformed URL (" + url_string + ").")
+            raise Bbb2Error.Bbb2Error("Malformed URL (" + url_string + ").")
 
         proto_string = url_string[start_idx_inc:end_idx_ex]
         if "http" == proto_string:
@@ -98,11 +97,11 @@ class Url:
         elif "https" == proto_string:
             self.protocol = Protocol.HTTPS
         else:
-            raise BackblazeB2Error("Malformed URL (" + url_string + ").")
+            raise Bbb2Error.Bbb2Error("Malformed URL (" + url_string + ").")
 
         start_idx_inc = url_string.find("://") + len("://")
         if start_idx_inc >= len(url_string):
-            raise BackblazeB2Error("Malformed URL (" + url_string + ").")
+            raise Bbb2Error.Bbb2Error("Malformed URL (" + url_string + ").")
 
         end_idx_ex = url_string.find("/", start_idx_inc)
         if -1 != end_idx_ex:
@@ -127,7 +126,7 @@ class Url:
         elif Protocol.HTTPS == self.protocol:
             protoString = "https"
         else:
-            raise BackblazeB2Error("Invalid protocol enum ("
+            raise Bbb2Error.Bbb2Error("Invalid protocol enum ("
                                    + str(self.protocol) + ")")
 
         return protoString + "://" + str(self.domain) + str(self.path)
@@ -191,7 +190,7 @@ def send_request(url, method, headers, body):
             cached_connection.connection \
             = http.client.HTTPSConnection(host=str(url.domain))
         else:
-            raise BackblazeB2InternalError("Invalid protocol value in URL"
+            raise Bbb2Error.InternalError("Invalid protocol value in URL"
                                            + " (" + str(url) + ").")
     try:
         if Method.GET == method:
@@ -201,7 +200,7 @@ def send_request(url, method, headers, body):
             cached_connection.connection.request(method='POST', url=str(url),
                                                  headers=headers, body=body)
         else:
-            raise BackblazeB2InternalError("Invalid HTTP method value"
+            raise Bbb2Error.InternalError("Invalid HTTP method value"
                                            + " (" + str(method) + ").")
 
         response = cached_connection.connection.getresponse()
@@ -215,4 +214,4 @@ def send_request(url, method, headers, body):
               ", method=\"" + str(method) + "\"" \
               ", req_headers=\"" + str(headers) + "\"" \
               ", req_body=\"" + str(body) + "\"."
-        raise BackblazeB2ConnectError(msg) from e
+        raise Bbb2Error.ConnectError(msg) from e

@@ -2,11 +2,7 @@ import http
 import json
 
 import BackblazeB2Api
-from BackblazeB2Error import BackblazeB2ApiParseError
-from BackblazeB2Error import BackblazeB2BadRequestError
-from BackblazeB2Error import BackblazeB2ExpiredAuthError
-from BackblazeB2Error import BackblazeB2RemoteError
-from BackblazeB2Error import BackblazeB2UnauthorizedError
+import Bbb2Error
 import util.http
 
 def list_all_parts(creds, file_id):
@@ -53,17 +49,17 @@ def send_request(url, method, headers, body,
             resp_body = json.loads(str(object=response.resp_body,
                                        encoding='utf-8'))
             if "expired_auth_token" == resp_body["code"]:
-                raise BackblazeB2ExpiredAuthError(str(response))
+                raise Bbb2Error.ExpiredAuthError(str(response))
             else:
-                raise BackblazeB2UnauthorizedError(str(response))
+                raise Bbb2Error.UnauthorizedError(str(response))
         elif http.HTTPStatus.BAD_REQUEST == response.status_code:
-            raise BackblazeB2BadRequestError(str(response))
+            raise Bbb2Error.BadRequestError(str(response))
         elif http.HTTPStatus.INTERNAL_SERVER_ERROR == response.status_code:
-            raise BackblazeB2RemoteError(str(response))
+            raise Bbb2Error.RemoteError(str(response))
         else:
             msg = "Unhandled HTTP response status code."
             msg += " StatusCode=" + str(response.status_code)
             msg += ", Response=\"" + str(response) + "\"."
-            raise BackblazeB2ApiParseError(msg)
+            raise Bbb2Error.ApiParseError(msg)
     except (json.JSONDecodeError, KeyError) as e:
-        raise BackblazeB2ApiParseError(str(response)) from e
+        raise Bbb2Error.ApiParseError(str(response)) from e

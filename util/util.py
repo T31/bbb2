@@ -1,7 +1,7 @@
 import hashlib
 import os.path
 
-from BackblazeB2Error import BackblazeB2Error
+import Bbb2Error
 
 def get_file_len_bytes(file_path):
     file_size = None
@@ -10,7 +10,7 @@ def get_file_len_bytes(file_path):
     except OSError as e:
         msg = ("Failed to get file size."
                " SrcFilePath=\"" + str(file_path) + "\".")
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
 def gen_fraction_percent_str(numerator, denominator):
     fraction = str(numerator) + "/" + str(denominator)
@@ -28,7 +28,7 @@ def calc_sha1_file(file_path):
         file_stream = open(file=file_path, mode='rb')
     except OSError as e:
         msg = "Failed to calc sha1 for file \"" + str(file_path) + "\"."
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
     try:
         hasher = hashlib.sha1()
@@ -46,7 +46,7 @@ def get_entire_file(file_path):
         file_stream = open(file=file_path, mode='rb')
     except OSError as e:
         msg = "Failed to read file \"" + str(file_path) + "\"."
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
     try:
         return file_stream.read()
@@ -58,7 +58,7 @@ def open_binary_read_file(file_path):
         return open(file=file_path, mode='rb')
     except OSError as e:
         msg = "Unable to open file \"" + src_file_path + "\"."
-        raise BackblazeB2Error(msg) from e
+        raise Bbb2Error.Bbb2Error(msg) from e
 
 def read_file_chunk(read_file, read_len):
     if 0 == read_len:
