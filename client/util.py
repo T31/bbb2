@@ -36,7 +36,7 @@ def check_for_upload_parts(creds, bucket_name, file_name):
     return UnfinishedUpload(file_id, file_name, upload_parts)
 
 def get_bucket_id_from_name(creds, bucket_name):
-    buckets = api.api.api.list_buckets(creds, bucket_name)
+    buckets = api.api.Api.list_buckets(creds, bucket_name)
     if bucket_name in buckets:
         return buckets[bucket_name]
     else:
@@ -71,7 +71,7 @@ def get_cred_from_default_file():
 
 def get_file_info(creds, bucket_name, file_name):
     bucket_id = get_bucket_id_from_name(creds, bucket_name)
-    bucket_files = api.api.api.list_file_names(creds, bucket_id)
+    bucket_files = api.api.Api.list_file_names(creds, bucket_id)
     if file_name in bucket_files:
         return bucket_files[file_name]
     else:
@@ -104,7 +104,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
     file_id = uploaded_parts.file_id
     if None == file_id:
         dst_bucket_id = get_bucket_id_from_name(creds, dst_bucket_name)
-        file_id = api.api.api.start_large_file(creds, dst_bucket_id,
+        file_id = api.api.Api.start_large_file(creds, dst_bucket_id,
                                                   dst_file_name)
         uploaded_parts.file_id = file_id
         uploaded_parts.file_name = dst_file_name
@@ -130,7 +130,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
     log.log_info("Part length is " + str(part_len) + ".")
 
-    upload_creds = api.api.api.get_upload_part_url(creds, file_id)
+    upload_creds = api.api.Api.get_upload_part_url(creds, file_id)
     upload_url = util.http.Url(None, None, None)
     upload_url.from_string(upload_creds["upload_part_url"])
     upload_auth_token = upload_creds["upload_part_auth_token"]
@@ -149,7 +149,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
 
         result = None
         try:
-            result = api.api.api.upload_part(upload_url,
+            result = api.api.Api.upload_part(upload_url,
                                                 upload_auth_token, part_num,
                                                 part)
             consecutive_failures = 0
@@ -162,7 +162,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
         # block crashes the whole program.
         if consecutive_failures > 0:
             log.log_warning("Refreshing upload URL.")
-            new_url = api.api.api.get_upload_part_url(creds, file_id)
+            new_url = api.api.Api.get_upload_part_url(creds, file_id)
             upload_url.from_string(new_url["upload_part_url"])
             upload_auth_token = new_url["upload_part_auth_token"]
             continue
@@ -172,7 +172,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
             continue
 
         total_bytes_uploaded += len(part)
-        part_record = api.api.api.UploadPart(part_num, len(part),
+        part_record = api.api.Api.UploadPart(part_num, len(part),
                                                 part_sha1)
 
         uploaded_parts.uploaded_parts[part_num] = part_record
@@ -190,7 +190,7 @@ def upload_file_big(creds, src_file_path, dst_bucket_name, dst_file_name,
         for i in range(1, part_num):
             part_hashes.append(uploaded_parts.uploaded_parts[i].sha1)
 
-        api.api.api.finish_large_file(creds, file_id, part_hashes)
+        api.api.Api.finish_large_file(creds, file_id, part_hashes)
     else:
         log.log_warning("Bad part detected!"
                         + " Recommending to restart the upload from scratch."
@@ -202,7 +202,7 @@ def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
         raise Bbb2Error.Bbb2Error("Unable to find bucket name"
                                   + " \"" + bucket_name + "\".")
 
-    vals = api.api.api.get_upload_url(creds.api_url, creds.auth_token,
+    vals = api.api.Api.get_upload_url(creds.api_url, creds.auth_token,
                                          bucket_id)
 
     upload_url = util.http.Url(util.http.Protocol.HTTPS, [], [])
@@ -210,7 +210,7 @@ def upload_file_small(creds, bucket_name, dst_file_name, src_file_path):
 
     upload_auth_token = vals["upload_auth_token"]
 
-    results = api.api.api.upload_file(upload_url, upload_auth_token,
+    results = api.api.Api.upload_file(upload_url, upload_auth_token,
                                          dst_file_name, src_file_path)
     msg = "File upload complete."
     msg += " SrcFilePath=\"" + str(src_file_path) + "\""

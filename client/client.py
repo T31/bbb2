@@ -64,23 +64,23 @@ class Client():
                                                             bucket_name)
 
             unfinished_files = \
-            api.api.api.list_unfinished_large_files(self.credentials,
+            api.api.Api.list_unfinished_large_files(self.credentials,
                                                        bucket_id)
 
             for file in unfinished_files.unfinished_files:
                 self.cancel_large_file(file.file_id)
 
     def cancel_large_file(self, file_id):
-        api.api.api.cancel_large_file(self.credentials, file_id)
+        api.api.Api.cancel_large_file(self.credentials, file_id)
         print("Cancelled large file ID " + str(file_id))
 
     def copy_file(self, src_file_id, dst_bucket_name, dst_file_name):
-        dst_bucket_id = api.api.api.list_buckets(self.api_url,
+        dst_bucket_id = api.api.Api.list_buckets(self.api_url,
                                                     self.auth_token,
                                                     self.account_id,
                                                     dst_bucket_name)[0][1]
 
-        api.api.api.copy_file(self.api_url, self.auth_token, src_file_id,
+        api.api.Api.copy_file(self.api_url, self.auth_token, src_file_id,
                                  dst_bucket_id, dst_file_name)
 
     def download_file(self, src_bucket_name, src_file_path, dst_file_path):
@@ -111,7 +111,7 @@ class Client():
                 if end_idx_inc > src_file_len:
                     end_idx_inc = src_file_len - 1
 
-                result = api.api.api.download_file_by_id(self.credentials,
+                result = api.api.Api.download_file_by_id(self.credentials,
                                                             src_file_id,
                                                             start_idx_inc,
                                                             end_idx_inc)
