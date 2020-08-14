@@ -211,8 +211,8 @@ def send_request(url, method, headers, body):
     except (http.client.IncompleteRead, BrokenPipeError,
             ConnectionResetError) as e:
         cached_connection.clear()
-        msg = "Connection error during HTTP request. Url=\"" + str(url) + "\""
-        msg += ", method=\"" + str(method) + "\""
-        msg += ", req_headers=\"" + str(headers) + "\""
-        msg += ", req_body=\"" + str(body) + "\"."
+        msg = "Connection error during HTTP request. Url=\"" + str(url) + "\"" \
+              ", method=\"" + str(method) + "\"" \
+              ", req_headers=\"" + str(headers) + "\"" \
+              ", req_body=\"" + str(body) + "\"."
         raise BackblazeB2ConnectError(msg) from e

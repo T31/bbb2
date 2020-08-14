@@ -175,11 +175,12 @@ def get_upload_url(api_url, auth_token, bucket_id):
     response = util.api.send_request(local_api_url, util.http.Method.POST,
                                      headers, body)
     try:
-        return {"bucket_id" : response["bucketId"],
-                "upload_url" : response["uploadUrl"],
-                "upload_auth_token" : response["authorizationToken"]}
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
+        resp_body = json.loads(response.resp_body)
+        return {"bucket_id" : resp_body["bucketId"],
+                "upload_url" : resp_body["uploadUrl"],
+                "upload_auth_token" : resp_body["authorizationToken"]}
+    except (json.JSONDecodeError, KeyError) as e:
+        msg = "Failed to parse response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
 def list_buckets(creds, bucket_name = None):
@@ -317,12 +318,13 @@ def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
     response = util.api.send_request(upload_url, util.http.Method.POST,
                                      headers, body)
     try:
-        return {"bucket_id" : response["bucketId"],
-                "hash_sha1" : response["contentSha1"],
-                "file_id" : response["fileId"],
-                "file_name" : response["fileName"]}
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
+        resp_body = json.loads(response.resp_body)
+        return {"bucket_id" : resp_body["bucketId"],
+                "hash_sha1" : resp_body["contentSha1"],
+                "file_id" : resp_body["fileId"],
+                "file_name" : resp_body["fileName"]}
+    except (json.JSONDecodeError, KeyError) as e:
+        msg = "Failed to parse response. " + str(response)
         raise BackblazeB2Error(msg) from e
 
 def upload_part(upload_url, auth_token, part_num, part):
