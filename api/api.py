@@ -10,10 +10,8 @@ import Bbb2Error
 import util.http
 import util.util
 
-class api(api.raw.Raw):
-    def __init__(self):
-        pass
-
+class Api(api.raw.Raw):
+    @staticmethod
     def list_all_parts(creds, file_id):
         result_list = [BackblazeB2Api.list_parts(creds, file_id)]
 
@@ -30,6 +28,7 @@ class api(api.raw.Raw):
 
         return BackblazeB2Api.ListPartsResult(all_upload_parts, None)
 
+    @staticmethod
     def list_all_unfinished_large_files(creds, bucket_id):
         list_of_lists = [BackblazeB2Api.list_unfinished_large_files(creds,
                                                                     bucket_id)]

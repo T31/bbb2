@@ -1,5 +1,5 @@
-# These are the exact calls of the BackblazeB2 REST API with no convenience
-# methods.
+# These are the exact calls of the BackblazeB2 REST API (no convenience
+# methods).
 
 import base64
 import copy
@@ -19,7 +19,8 @@ class Raw:
     def __init__(self):
         pass
 
-    def authorize(self, key_id, application_key):
+    @staticmethod
+    def authorize(key_id, application_key):
         auth = key_id + ":" + application_key
         auth = auth.encode(encoding='utf-8')
         auth = base64.b64encode(auth)
@@ -46,7 +47,8 @@ class Raw:
         except (json.JSONDecodeError, KeyError) as e:
             raise Bbb2Error.ApiParseError(str(response)) from e
 
-    def cancel_large_file(self, creds, file_id):
+    @staticmethod
+    def cancel_large_file(creds, file_id):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_cancel_large_file"])
@@ -56,7 +58,8 @@ class Raw:
         api.util.send_request(local_api_url, util.http.Method.POST, headers,
                               body)
 
-    def copy_file(self, api_url, auth_token, src_file_id, dst_bucket_id,
+    @staticmethod
+    def copy_file(api_url, auth_token, src_file_id, dst_bucket_id,
                   dst_file_name):
         local_api_url = copy.deepcopy(api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
@@ -73,7 +76,8 @@ class Raw:
         api.util.send_request(local_api_url, util.http.Method.POST, headers,
                               body)
 
-    def download_file_by_id(self, creds, file_id, start_idx_inc, end_idx_inc):
+    @staticmethod
+    def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
         local_download_url = copy.deepcopy(creds.download_url)
 
         local_download_url.path \
@@ -98,7 +102,8 @@ class Raw:
                                       resp_headers["x-bz-content-sha1"],
                                       response.resp_body)
 
-    def download_file_by_name(self, download_url, auth_token, bucket_name,
+    @staticmethod
+    def download_file_by_name(download_url, auth_token, bucket_name,
                               file_name, start_idx_inc, end_idx_inc):
         local_download_url = copy.deepcopy(download_url)
         local_download_url.path = util.http.Path(["file", bucket_name,
@@ -111,7 +116,8 @@ class Raw:
         return api.util.send_request(local_download_url, util.http.Method.GET,
                                      headers, None, good_status_codes)
 
-    def finish_large_file(self, creds, file_id, sha1_part_hashes):
+    @staticmethod
+    def finish_large_file(creds, file_id, sha1_part_hashes):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_finish_large_file"])
@@ -121,7 +127,8 @@ class Raw:
         api.util.send_request(local_api_url, util.http.Method.POST, headers,
                               body)
 
-    def get_upload_part_url(self, creds, file_id):
+    @staticmethod
+    def get_upload_part_url(creds, file_id):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_get_upload_part_url"])
@@ -138,7 +145,8 @@ class Raw:
         except (json.JSONDecodeError, KeyError) as e:
             raise Bbb2Error.ApiParseError(str(response)) from e
 
-    def get_upload_url(self, api_url, auth_token, bucket_id):
+    @staticmethod
+    def get_upload_url(api_url, auth_token, bucket_id):
         local_api_url = copy.deepcopy(api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_get_upload_url"])
@@ -156,7 +164,8 @@ class Raw:
             msg = "Failed to parse response. " + str(response)
             raise Bbb2Error.Bbb2Error(msg) from e
 
-    def list_buckets(self, creds, bucket_name = None):
+    @staticmethod
+    def list_buckets(creds, bucket_name = None):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_list_buckets"])
@@ -179,7 +188,8 @@ class Raw:
         except (json.JSONDecodeError, KeyError) as e:
             raise Bbb2Error.ApiParseError(str(response)) from e
 
-    def list_file_names(self, creds, bucket_id):
+    @staticmethod
+    def list_file_names(creds, bucket_id):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_list_file_names"])
@@ -200,7 +210,8 @@ class Raw:
             msg = "Failed to find key in response. " + str(response)
             raise Bbb2Error.Bbb2Error(msg) from e
 
-    def list_parts(self, creds, file_id, start_part = None):
+    @staticmethod
+    def list_parts(creds, file_id, start_part = None):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_list_parts"])
@@ -230,8 +241,8 @@ class Raw:
         except (json.JSONDecodeError, KeyError) as e:
             raise Bbb2Error.ApiParseError(str(response)) from e
 
-    def list_unfinished_large_files(self, creds, bucket_id,
-                                    start_file_id = None):
+    @staticmethod
+    def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_list_unfinished_large_files"])
@@ -259,7 +270,8 @@ class Raw:
         except (json.JSONDecodeError, KeyError) as e:
             raise Bbb2Error.ApiParseError(str(response)) from e
 
-    def start_large_file(self, creds, bucket_id, dst_file_name):
+    @staticmethod
+    def start_large_file(creds, bucket_id, dst_file_name):
         local_api_url = copy.deepcopy(creds.api_url)
         local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                              "b2_start_large_file"])
@@ -279,7 +291,8 @@ class Raw:
             msg = "Failed to find key in response. " + str(response)
             raise Bbb2Error.Bbb2Error(msg) from e
 
-    def upload_file(self, upload_url, upload_auth_token, dst_file_name,
+    @staticmethod
+    def upload_file(upload_url, upload_auth_token, dst_file_name,
                     src_file_path, src_file_sha1 = None):
         file_len = str(util.util.get_file_len_bytes(src_file_path))
 
@@ -307,7 +320,8 @@ class Raw:
             msg = "Failed to parse response. " + str(response)
             raise Bbb2Error.Bbb2Error(msg) from e
 
-    def upload_part(self, upload_url, auth_token, part_num, part):
+    @staticmethod
+    def upload_part(upload_url, auth_token, part_num, part):
         hasher = hashlib.sha1()
         hasher.update(part)
 

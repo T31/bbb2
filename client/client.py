@@ -3,9 +3,9 @@ import log
 import os
 import random
 
-import BackblazeB2Api
+import api.api
 import Bbb2Error
-import util.client
+import client.util
 import util.http
 import util.util
 
@@ -31,18 +31,18 @@ class SessionCredentials:
         self.min_upload_part_bytes = min_upload_part_bytes
         self.recommended_upload_part_bytes = recommended_upload_part_bytes
 
-class client():
+class Client():
     credentials = None
 
     def authorize(self, key_id = None, application_key = None):
         temp_key_id = copy.deepcopy(key_id)
         temp_application_key = copy.deepcopy(application_key)
         if (None == key_id) or (None == application_key):
-            cred_pair = util.client.get_cred_from_default_file()
+            cred_pair = client.util.get_cred_from_default_file()
             temp_key_id = cred_pair[0]
             temp_application_key = cred_pair[1]
 
-        response = BackblazeB2Api.authorize(temp_key_id, temp_application_key)
+        response = api.api.Api.authorize(temp_key_id, temp_application_key)
         account_id = response["account_id"]
         auth_token = response["auth_token"]
         api_url = util.http.Url(util.http.Protocol.HTTP, [], [])
@@ -60,27 +60,27 @@ class client():
 
     def cancel_all_large_files(self):
         for bucket_name in self.list_buckets():
-            bucket_id = util.client.get_bucket_id_from_name(self.credentials,
+            bucket_id = client.util.get_bucket_id_from_name(self.credentials,
                                                             bucket_name)
 
             unfinished_files = \
-            BackblazeB2Api.list_unfinished_large_files(self.credentials,
+            api.api.api.list_unfinished_large_files(self.credentials,
                                                        bucket_id)
 
             for file in unfinished_files.unfinished_files:
                 self.cancel_large_file(file.file_id)
 
     def cancel_large_file(self, file_id):
-        BackblazeB2Api.cancel_large_file(self.credentials, file_id)
+        api.api.api.cancel_large_file(self.credentials, file_id)
         print("Cancelled large file ID " + str(file_id))
 
     def copy_file(self, src_file_id, dst_bucket_name, dst_file_name):
-        dst_bucket_id = BackblazeB2Api.list_buckets(self.api_url,
+        dst_bucket_id = api.api.api.list_buckets(self.api_url,
                                                     self.auth_token,
                                                     self.account_id,
                                                     dst_bucket_name)[0][1]
 
-        BackblazeB2Api.copy_file(self.api_url, self.auth_token, src_file_id,
+        api.api.api.copy_file(self.api_url, self.auth_token, src_file_id,
                                  dst_bucket_id, dst_file_name)
 
     def download_file(self, src_bucket_name, src_file_path, dst_file_path):
@@ -88,7 +88,7 @@ class client():
                      + " from bucket \"" + src_bucket_name + "\""
                      + " to path \"" + dst_file_path + "\".")
 
-        src_file_info = util.client.get_file_info(self.credentials,
+        src_file_info = client.util.get_file_info(self.credentials,
                                                   src_bucket_name,
                                                   src_file_path)
         src_file_id = src_file_info["fileId"]
@@ -111,7 +111,7 @@ class client():
                 if end_idx_inc > src_file_len:
                     end_idx_inc = src_file_len - 1
 
-                result = BackblazeB2Api.download_file_by_id(self.credentials,
+                result = api.api.api.download_file_by_id(self.credentials,
                                                             src_file_id,
                                                             start_idx_inc,
                                                             end_idx_inc)
@@ -126,7 +126,7 @@ class client():
                 out_file.close()
 
     def list_buckets(self, bucket_name=None):
-        return BackblazeB2Api.list_buckets(self.credentials, bucket_name)
+        return api.api.Api.list_buckets(self.credentials, bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
         file_len = util.util.get_file_len_bytes(src_file_path)
@@ -140,14 +140,14 @@ class client():
                                    + str(SessionCredentials.MAX_FILE_BYTES) + ".")
 
         if file_len <= self.credentials.recommended_upload_part_bytes:
-            util.client.upload_file_small(self.credentials, bucket_name,
+            client.util.upload_file_small(self.credentials, bucket_name,
                                           dst_file_name, src_file_path)
         else:
-            uploaded_parts = util.client.UnfinishedUpload()
+            uploaded_parts = client.util.UnfinishedUpload()
 
             while True:
                 try:
-                    util.client.upload_file_big(self.credentials, src_file_path,
+                    client.util.upload_file_big(self.credentials, src_file_path,
                                                 bucket_name, dst_file_name,
                                                 uploaded_parts)
                     return
