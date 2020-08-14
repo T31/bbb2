@@ -2,7 +2,7 @@ import enum
 import sys
 import traceback
 
-from BackblazeB2Client import BackblazeB2Client
+import client
 import Bbb2Error
 import log
 
@@ -27,7 +27,7 @@ if "__main__" == __name__:
         if (sys.argv[1] == "-h") or (sys.argv[1] == "--help"):
             print(usage_msg())
         elif sys.argv[1] == "--list-buckets":
-            client = BackblazeB2Client()
+            client = client.client.client()
             client.authorize()
 
             specific_bucket = None
@@ -52,11 +52,11 @@ if "__main__" == __name__:
                          + " to bucket \"" + bucket_name + "\""
                          + " with name \"" + dst_file_name + "\".")
 
-            client = BackblazeB2Client()
+            client = client.client.client()
             client.authorize()
             client.upload_file(bucket_name, dst_file_name, src_file_path)
         elif sys.argv[1] == "--cancel-all-large-file-uploads":
-            client = BackblazeB2Client()
+            client = client.client.client()
             client.authorize()
             client.cancel_all_large_files()
         elif sys.argv[1] == "--copy-file":
@@ -64,14 +64,14 @@ if "__main__" == __name__:
             dst_bucket_name = sys.argv[3]
             dst_file_name = sys.argv[4]
 
-            client = BackblazeB2Client()
+            client = client.client.client()
             client.authorize()
             client.copy_file(src_file_id, dst_bucket_name, dst_file_name)
         elif sys.argv[1] == "--download":
             src_bucket_name = sys.argv[2]
             src_file_name = sys.argv[3]
             dst_file_path = sys.argv[4]
-            client = BackblazeB2Client()
+            client = client.client.client()
             while True:
                 try:
                     client.authorize()

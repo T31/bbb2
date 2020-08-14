@@ -31,7 +31,7 @@ class SessionCredentials:
         self.min_upload_part_bytes = min_upload_part_bytes
         self.recommended_upload_part_bytes = recommended_upload_part_bytes
 
-class BackblazeB2Client:
+class client():
     credentials = None
 
     def authorize(self, key_id = None, application_key = None):
