@@ -12,11 +12,12 @@ class ExitCode(enum.Enum):
     INTERNAL_ERROR = 2
 
 def usage_msg():
-    return ("Usage : bbb2 --list-buckets [bucketName]\n"
-            "        bbb2 --upload dstBucketName dstName srcPath\n"
-            "        bbb2 --cancel-all-large-file-uploads\n"
-            "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n"
-            "        bbb2 --download srcBucketName srcFileName dstFilePath")
+    return "Usage : bbb2 --list-buckets [bucketName]\n" \
+           "        bbb2 --upload dstBucketName dstName srcPath\n" \
+           "        bbb2 --cancel-all-large-file-uploads\n" \
+           "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n" \
+           "        bbb2 --download srcBucketName srcFileName dstFilePath\n" \
+           "        bbb2 {-h|--help}"
 
 if "__main__" == __name__:
     try:
