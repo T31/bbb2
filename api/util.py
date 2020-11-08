@@ -49,4 +49,4 @@ def raise_appropriate_error(http_response):
         else:
             raise UnauthorizedError(str(http_response))
     else:
-        raise ApiParseError(str(response))
+        raise ApiParseError(str(http_response))

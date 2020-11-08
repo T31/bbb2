@@ -18,12 +18,12 @@ class AuthorizeResult:
         if (http.HTTPStatus.OK == response.status_code):
             json_body = json.loads(response.resp_body)
             try:
-                self.account_id = resp_json["accountId"]
-                self.auth_token = resp_json["authorizationToken"]
-                self.api_url = resp_json["apiUrl"]
-                self.download_url = resp_json["downloadUrl"]
-                self.min_part_size_bytes = resp_json["absoluteMinimumPartSize"]
-                self.rec_part_size_bytes = resp_json["recommendedPartSize"]
+                self.account_id = json_body["accountId"]
+                self.auth_token = json_body["authorizationToken"]
+                self.api_url = json_body["apiUrl"]
+                self.download_url = json_body["downloadUrl"]
+                self.min_part_size_bytes = json_body["absoluteMinimumPartSize"]
+                self.rec_part_size_bytes = json_body["recommendedPartSize"]
             except (json.JSONDecodeError, KeyError) as e:
                 raise Bbb2Error.ApiParseError(str(response)) from e
         else:
@@ -57,7 +57,8 @@ class DownloadFileByIdResult:
     payload = None
 
     def __init__(self, http_response):
-        if (http.HTTPStatus.OK == http_response.status_code):
+        if ((http.HTTPStatus.OK == http_response.status_code)
+            or (http.HTTPStatus.PARTIAL_CONTENT == http_response.status_code)):
             try:
                 self.file_id = http_response.resp_headers["x-bz-file-id"]
                 self.content_len = http_response.resp_headers["Content-Length"]
@@ -67,6 +68,24 @@ class DownloadFileByIdResult:
                 raise ApiParseError(str(response)) from e
         else:
             api.util.raise_appropraite_error(http_response)
+            assert False
+
+class FinishLargeFileResult:
+    account_id = None
+    bucket_id = None
+    file_id = None
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.account_id = json_body["accountId"]
+                self.bucket_id = json_body["bucketId"]
+                self.file_id = json_body["fileId"]
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
             assert False
 
 class UploadPart:

@@ -70,8 +70,11 @@ def finish_large_file(creds, file_id, sha1_part_hashes):
     headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"fileId" : file_id,
                        "partSha1Array" : sha1_part_hashes})
-    api.util.send_request(local_api_url, util.http.Method.POST, headers,
-                          body)
+
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+
+    return FinishLargeFileResult(response)
 
 def get_upload_part_url(creds, file_id):
     local_api_url = copy.deepcopy(creds.api_url)
