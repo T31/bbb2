@@ -28,7 +28,6 @@ class ApiRawTests(unittest.TestCase):
     def test_authorize(self):
         try:
             api.raw.authorize("someKeyId", "someAppKey")
-            self.assertTrue(True)
         except:
             traceback.print_exc()
             self.assertTrue(False)
@@ -36,7 +35,6 @@ class ApiRawTests(unittest.TestCase):
     def test_cancel_large_file(self):
         try:
             api.raw.cancel_large_file(self.creds, "someFileId")
-            self.assertTrue(True)
         except:
             traceback.print_exc()
             self.assertTrue(False)
@@ -44,7 +42,6 @@ class ApiRawTests(unittest.TestCase):
     def test_download_file_by_id(self):
         try:
             api.raw.download_file_by_id(self.creds, "someFileId", 0, 3)
-            self.assertTrue(True)
         except:
             traceback.print_exc()
             self.assertTrue(False)
@@ -53,7 +50,6 @@ class ApiRawTests(unittest.TestCase):
         try:
             api.raw.finish_large_file(self.creds, "someFileId",
                                       ["hash", "hash"])
-            self.assertTrue(True)
         except:
             traceback.print_exc()
             self.assertTrue(False)
