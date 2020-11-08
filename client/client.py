@@ -45,8 +45,7 @@ class Client():
         response = api.api.Api.authorize(temp_key_id, temp_application_key)
         account_id = response["account_id"]
         auth_token = response["auth_token"]
-        api_url = util.http.Url(util.http.Protocol.HTTP, [], [])
-        api_url.from_string(response["api_url"])
+        api_url = util.http.Url.from_string(response["api_url"])
         download_url = util.http.Url(util.http.Protocol.HTTP, [], [])
         download_url.from_string(response["download_url"])
         min_upload_part_bytes = response["min_part_size_bytes"]

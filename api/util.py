@@ -29,3 +29,17 @@ def send_request(url, method, headers, body,
             raise Bbb2Error.ApiParseError(msg)
     except (json.JSONDecodeError, KeyError) as e:
         raise Bbb2Error.ApiParseError(str(response)) from e
+
+class ApiErrorResponse:
+    status = None
+    code = None
+    msg = None
+
+    def __init__(json_str):
+        try:
+            json_obj = json.loads(json_str)
+            self.status = json_obj["status"]
+            self.code = json_obj["code"]
+            self.msg = json_obj["message"]
+        except (json.JSONDecodeError, KeyError) as e:
+            raise Bbb2Error.ApiParseError(json_str) from e

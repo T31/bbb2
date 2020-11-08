@@ -85,39 +85,47 @@ class Url:
                 and (self.domain == other.domain)
                 and (self.path == other.path))
 
+    @staticmethod
     def from_string(self, url_string):
         start_idx_inc = 0
         end_idx_ex = url_string.find("://")
         if -1 == end_idx_ex:
             raise Bbb2Error.Bbb2Error("Malformed URL (" + url_string + ").")
 
+        protocol = None
         proto_string = url_string[start_idx_inc:end_idx_ex]
         if "http" == proto_string:
-            self.protocol = Protocol.HTTP
+            protocol = Protocol.HTTP
         elif "https" == proto_string:
-            self.protocol = Protocol.HTTPS
+            protocol = Protocol.HTTPS
         else:
-            raise Bbb2Error.Bbb2Error("Malformed URL (" + url_string + ").")
+            raise Bbb2Error.InternalError("Malformed URL (" + url_string + ").")
 
         start_idx_inc = url_string.find("://") + len("://")
         if start_idx_inc >= len(url_string):
-            raise Bbb2Error.Bbb2Error("Malformed URL (" + url_string + ").")
+            raise Bbb2Error.InternalError("Malformed URL (" + url_string + ").")
 
+        domain_list = []
         end_idx_ex = url_string.find("/", start_idx_inc)
         if -1 != end_idx_ex:
             domain_list = url_string[start_idx_inc:end_idx_ex].split(".")
-            self.domain = Domain(domain_list)
         else:
-            self.domain = Domain(url_string[start_idx_inc:].split("."))
+            domain_list = url_string[start_idx_inc:].split(".")
 
+        path_list = []
         start_idx_inc = end_idx_ex
         if -1 == start_idx_inc:
-            self.path = Path([])
+            pass
         elif (start_idx_inc + len("/")) >= len(url_string):
-            self.path = Path([])
+            pass
         else:
             start_idx_inc += len("/")
-            self.path = Path(url_string[start_idx_inc:].split("/"))
+            path_list = url_string[start_idx_inc:].split("/")
+
+        return Url(protocol, domain_list, path_list)
+
+    def set_from_string(self, url: str):
+        self = from_string(url)
 
     def __str__(self):
         protoString = ""
@@ -126,8 +134,8 @@ class Url:
         elif Protocol.HTTPS == self.protocol:
             protoString = "https"
         else:
-            raise Bbb2Error.Bbb2Error("Invalid protocol enum ("
-                                   + str(self.protocol) + ")")
+            raise Bbb2Error.InternalError("Invalid protocol enum ("
+                                          + str(self.protocol) + ")")
 
         return protoString + "://" + str(self.domain) + str(self.path)
 
