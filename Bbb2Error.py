@@ -26,6 +26,10 @@ class RemoteError(Bbb2Error):
     def __init__(self, message):
         super().__init__(message)
 
+class RemoteResourceLimitError(Bbb2Error):
+    def __init__(self, message):
+        super().__init__(message)
+
 class UnauthorizedError(Bbb2Error):
     def __init__(self, message):
         super().__init__(message)
