@@ -125,6 +125,21 @@ class GetUploadUrlResult:
             api.util.raise_appropriate_error(http_response)
             assert False
 
+class ListBucketsResult:
+    buckets = dict()
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                for bucket in json_body["buckets"]:
+                    buckets[bucket["bucketId"]] = bucket["bucketName"]
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False
+
 class UploadPart:
     part_num = None
     content_len = None

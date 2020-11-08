@@ -113,16 +113,10 @@ def list_buckets(creds, bucket_name = None):
         body["bucketName"] = bucket_name
     body = json.dumps(body)
 
-    response = api.util.send_request(local_api_url, util.http.Method.POST,
-                                     headers, body)
-    try:
-        resp_body = json.loads(response.resp_body)
-        ret_val = dict()
-        for bucket in resp_body["buckets"]:
-            ret_val[bucket["bucketName"]] = bucket["bucketId"]
-        return ret_val
-    except (json.JSONDecodeError, KeyError) as e:
-        raise Bbb2Error.ApiParseError(str(response)) from e
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+    
+    return ListBucketsResult(response)
 
 def list_file_names(creds, bucket_id):
     local_api_url = copy.deepcopy(creds.api_url)
@@ -158,9 +152,9 @@ def list_parts(creds, file_id, start_part = None):
     body = json.dumps(body)
 
     try:
-        response = api.util.send_request(local_api_url,
-                                         util.http.Method.POST, headers,
-                                         body)
+        response = api.util.send_request(local_api_url, util.http.Method.POST,
+                                         headers, body)
+
         resp_json = json.loads(response.resp_body)
 
         upload_parts = dict()
