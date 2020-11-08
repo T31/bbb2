@@ -48,23 +48,6 @@ def cancel_large_file(creds, file_id):
 
     return CancelLargeFileResult(response)
 
-def copy_file(api_url, auth_token, src_file_id, dst_bucket_id,
-              dst_file_name):
-    local_api_url = copy.deepcopy(api_url)
-    local_api_url.path = util.http.Path(["b2api", API_VERSION,
-                                         "b2_copy_file"])
-
-    headers = {"Authorization" : auth_token}
-
-    body = {"sourceFileId" : src_file_id,
-            "fileName" : dst_file_name}
-    if None != dst_bucket_id:
-        body["destinationBucketId"] = dst_bucket_id
-    body = json.dumps(body)
-
-    api.util.send_request(local_api_url, util.http.Method.POST, headers,
-                          body)
-
 def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
     local_download_url = copy.deepcopy(creds.download_url)
 

@@ -15,7 +15,6 @@ def usage_msg():
     return "Usage : bbb2 --list-buckets [bucketName]\n" \
            "        bbb2 --upload dstBucketName dstName srcPath\n" \
            "        bbb2 --cancel-all-large-file-uploads\n" \
-           "        bbb2 --copy-file srcFileId dstBucketName dstFileName\n" \
            "        bbb2 --download srcBucketName srcFileName dstFilePath\n" \
            "        bbb2 {-h|--help}"
 
@@ -60,14 +59,6 @@ if "__main__" == __name__:
             client = client.client.Client()
             client.authorize()
             client.cancel_all_large_files()
-        elif sys.argv[1] == "--copy-file":
-            src_file_id = sys.argv[2]
-            dst_bucket_name = sys.argv[3]
-            dst_file_name = sys.argv[4]
-
-            client = client.client.Client()
-            client.authorize()
-            client.copy_file(src_file_id, dst_bucket_name, dst_file_name)
         elif sys.argv[1] == "--download":
             src_bucket_name = sys.argv[2]
             src_file_name = sys.argv[3]

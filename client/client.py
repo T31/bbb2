@@ -73,15 +73,6 @@ class Client():
         api.api.Api.cancel_large_file(self.credentials, file_id)
         print("Cancelled large file ID " + str(file_id))
 
-    def copy_file(self, src_file_id, dst_bucket_name, dst_file_name):
-        dst_bucket_id = api.api.Api.list_buckets(self.api_url,
-                                                    self.auth_token,
-                                                    self.account_id,
-                                                    dst_bucket_name)[0][1]
-
-        api.api.Api.copy_file(self.api_url, self.auth_token, src_file_id,
-                                 dst_bucket_id, dst_file_name)
-
     def download_file(self, src_bucket_name, src_file_path, dst_file_path):
         log.log_info("Downloading file \"" + src_file_path + "\""
                      + " from bucket \"" + src_bucket_name + "\""
