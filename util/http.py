@@ -160,12 +160,19 @@ class Response:
         self.resp_body = resp_body
 
     def __str__(self):
-        return ("ReqUrl=\"" + str(self.req_url) + "\""
-                + ", ReqHeaders=\"" + str(self.req_headers) + "\""
-                + ", ReqBody=\"" + str(self.req_body) + "\""
-                + ", RespStatusCode=" + str(self.status_code)
-                + ", RespHeaders=\"" + str(self.resp_headers) + "\""
-                + ", RespBody=\"" + str(self.resp_body) + "\"")
+        msg = "ReqUrl=\"" + str(self.req_url) + "\"" \
+              + ", ReqHeaders=\"" + str(self.req_headers) + "\"" \
+              + ", ReqBody=\"" + str(self.req_body) + "\"" \
+              + ", RespStatusCode=" + str(self.status_code) \
+              + ", RespHeaders=\"" + str(self.resp_headers) + "\"" \
+              + ", RespBody=\""
+
+        if (len(self.resp_body) > 10240):
+            msg += "VeryLargePlaceholder\""
+        else:
+            msg += str(self.resp_body) + "\""
+
+        return msg
 
 class CachedConnection:
     url = None
