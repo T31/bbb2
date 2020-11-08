@@ -13,6 +13,15 @@ from api.results import AuthorizeResult
 from api.results import CancelLargeFileResult
 from api.results import DownloadFileByIdResult
 from api.results import FinishLargeFileResult
+from api.results import GetUploadPartUrlResult
+from api.results import GetUploadUrlResult
+from api.results import ListBucketsResult
+from api.results import ListFileNamesResult
+from api.results import ListPartsResult
+from api.results import ListUnfinishedLargeFilesResult
+from api.results import StartLargeFileResult
+from api.results import UploadFileResult
+from api.results import UploadPartResult
 import api.util
 import Bbb2Error
 import util.http
