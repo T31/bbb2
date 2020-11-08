@@ -158,21 +158,10 @@ def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
         body["startFileId"] = start_file_id
     body = json.dumps(body)
 
-    try:
-        response = api.util.send_request(local_api_url,
-                                         util.http.Method.POST, headers,
-                                         body)
-        resp_json = json.loads(response.resp_body)
+    response = api.util.send_request(local_api_url, util.http.Method.POST,
+                                     headers, body)
 
-        file_list = []
-        for file in resp_json["files"]:
-            file_list.append(UnfinishedLargeFile(file["fileId"],
-                                                 file["fileName"]))
-
-        return ListUnfinishedLargeFilesResult(file_list,
-                                              resp_json["nextFileId"])
-    except (json.JSONDecodeError, KeyError) as e:
-        raise Bbb2Error.ApiParseError(str(response)) from e
+    return ListUnfinishedLargeFilesResult(response)
 
 def start_large_file(creds, bucket_id, dst_file_name):
     local_api_url = copy.deepcopy(creds.api_url)

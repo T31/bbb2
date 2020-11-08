@@ -1,7 +1,6 @@
 import http
 import json
 
-from api.util import ApiErrorResponse
 from Bbb2Error import ApiParseError
 from Bbb2Error import BadRequestError
 from Bbb2Error import UnauthorizedError
@@ -207,9 +206,20 @@ class UnfinishedLargeFile:
         self.file_name = file_name
 
 class ListUnfinishedLargeFilesResult:
-    unfinished_files = None
+    unfinished_files = []
     next_file = None
 
-    def __init__(self, unfinished_files, next_file):
-        self.unfinished_files = unfinished_files
-        self.next_file = next_file
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.next_file = json_body["nextFileId"]
+                for cur_file in json_body["files"]:
+                    new_file = UnfinishedLargeFile(cur_file["fileId"],
+                                                   cur_file["fileName"])
+                    self.unfinished_files.append(new_file)
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False

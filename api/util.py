@@ -40,11 +40,11 @@ def raise_appropriate_error(http_response):
     http_code = http_response.status_code
 
     if ((http.HTTPStatus.BAD_REQUEST == http_code)
-        or (http.HTTPStatus.NOT_FOUND == http_code)):
+        or (http.HTTPStatus.NOT_FOUND == http_code)
         or (http.HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE == http_code)):
         raise BadRequestError(str(http_response))
     elif (http.HTTPStatus.UNAUTHORIZED == http_code):
-        elif ("unsupported" == bb_code):
+        if ("unsupported" == bb_code):
             raise BadRequestError(str(http_response))
         elif ("expired_auth_token" == bb_code):
             raise ExpiredAuthError(str(http_response))
