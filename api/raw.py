@@ -42,8 +42,11 @@ def cancel_large_file(creds, file_id):
 
     headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"fileId" : file_id})
-    api.util.send_request(local_api_url, util.http.Method.POST, headers,
-                          body)
+
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+
+    return CancelLargeFileResult(response)
 
 def copy_file(api_url, auth_token, src_file_id, dst_bucket_id,
               dst_file_name):

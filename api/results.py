@@ -1,3 +1,5 @@
+import json
+
 from api.util import ApiErrorResponse
 from Bbb2Error import ApiParseError
 from Bbb2Error import BadRequestError
@@ -47,6 +49,35 @@ class AuthorizeResult:
         elif ((403 == reponse.status_code)
               and ("transaction_cap_exceeded" == err.code)):
             raise BadRequestError(str(response))
+        else:
+            raise ApiParseError(str(response))
+
+class CancelLargeFileResult:
+    file_id = None
+    account_id = None
+    bucket_id = None
+    file_name = None
+
+    def __init__(self, http_response):
+        if (200 == response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.file_id = json_body["fileId"]
+                self.account_id = json_body["accountId"]
+                self.bucket_id = json_body["bucketId"]
+                self.file_name = json_body["fileName"]
+                return
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(response))
+
+        err = ApiErrorResponse(str(response.resp_body))
+        if (400 == http_response.status_code):
+            raise BadRequestError(str(response))
+        elif (401 == http_response.status_code):
+            if ("expired_auth_token" == err.code):
+                raise ExpiredAuthError(str(response))
+            else:
+                raise UnauthorizedError(str(response))
         else:
             raise ApiParseError(str(response))
 
