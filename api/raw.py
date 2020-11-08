@@ -58,16 +58,10 @@ def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
     range_str = "bytes=" + str(start_idx_inc) + "-" + str(end_idx_inc)
     headers = {"Authorization" : creds.auth_token, "Range" : range_str}
     body = json.dumps({"fileId" : file_id})
-    good_status_codes = [http.HTTPStatus.OK,
-                         http.HTTPStatus.PARTIAL_CONTENT]
-    response = api.util.send_request(local_download_url,
-                                     util.http.Method.POST, headers, body,
-                                     good_status_codes)
+    response = util.http.send_request(local_download_url, util.http.Method.POST,
+                                      headers, body)
 
-    return DownloadFileByIdResult(resp_headers["x-bz-file-id"],
-                                  resp_headers["Content-Length"],
-                                  resp_headers["x-bz-content-sha1"],
-                                  response.resp_body)
+    return DownloadFileByIdResult(response)
 
 def download_file_by_name(download_url, auth_token, bucket_name,
                           file_name, start_idx_inc, end_idx_inc):

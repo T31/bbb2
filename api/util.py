@@ -1,7 +1,7 @@
 import http
 import json
 
-import Bbb2Error
+from Bbb2Error import BadRequestError
 import util.http
 
 def send_request(url, method, headers, body,
@@ -30,16 +30,23 @@ def send_request(url, method, headers, body,
     except (json.JSONDecodeError, KeyError) as e:
         raise Bbb2Error.ApiParseError(str(response)) from e
 
-class ApiErrorResponse:
-    status = None
+def raise_appropriate_error(http_response):
     code = None
-    msg = None
+    try:
+        code = json.loads(str(http_response.resp_body))["code"]
+    except (json.JSONDecodeError, KeyError) as e:
+        raise Bbb2Error.ApiParseError(json_str) from e
 
-    def __init__(json_str):
-        try:
-            json_obj = json.loads(json_str)
-            self.status = json_obj["status"]
-            self.code = json_obj["code"]
-            self.msg = json_obj["message"]
-        except (json.JSONDecodeError, KeyError) as e:
-            raise Bbb2Error.ApiParseError(json_str) from e
+    if ((http.HTTPStatus.BAD_REQUEST == http_response.status_code)
+        or (http.HTTPStatus.FORBIDDEN == http_response.status_code)
+        or (http.HTTPStatus.NOT_FOUND == http_response.status_code)):
+        raise BadRequestError(str(http_response))
+    elif (http.HTTPStatus.UNAUTHORIZED == http_response.status_code):
+        elif ("unsupported" == code):
+            raise BadRequestError(str(http_response))
+        elif ("expired_auth_token" == code):
+            raise ExpiredAuthError(str(http_response))
+        else:
+            raise UnauthorizedError(str(http_response))
+    else:
+        raise ApiParseError(str(response))

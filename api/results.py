@@ -1,3 +1,4 @@
+import http
 import json
 
 from api.util import ApiErrorResponse
@@ -24,7 +25,7 @@ class AuthorizeResult:
 
     @staticmethod
     def from_http_response(response):
-        if (200 == response.status_code):
+        if (http.HTTPStatus.OK == response.status_code):
             json_body = json.loads(response.resp_body)
             try:
                 return AuthorizeResult(resp_json["accountId"],
@@ -36,21 +37,7 @@ class AuthorizeResult:
             except (json.JSONDecodeError, KeyError) as e:
                 raise Bbb2Error.ApiParseError(str(response)) from e
 
-        err = ApiErrorResponse(str(response.resp_body))
-        if (400 == response.status_code):
-            raise BadRequestError(str(response))
-        elif (401 == response.status_code):
-            if ("unauthorized" == err.code):
-                raise UnauthorizedError(str(response))
-            elif ("unsupported" == err.code):
-                raise BadRequestError(str(response))
-            else:
-                raise ApiParseError(str(response))
-        elif ((403 == reponse.status_code)
-              and ("transaction_cap_exceeded" == err.code)):
-            raise BadRequestError(str(response))
-        else:
-            raise ApiParseError(str(response))
+        api.util.raise_appropriate_error(response)
 
 class CancelLargeFileResult:
     file_id = None
@@ -59,27 +46,36 @@ class CancelLargeFileResult:
     file_name = None
 
     def __init__(self, http_response):
-        if (200 == response.status_code):
+        if (http.HTTPStatus.OK == response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
                 self.file_id = json_body["fileId"]
-                self.account_id = json_body["accountId"]
+                
                 self.bucket_id = json_body["bucketId"]
                 self.file_name = json_body["fileName"]
                 return
             except (json.JSONDecodeError, KeyError) as e:
                 raise ApiParseError(str(response))
 
-        err = ApiErrorResponse(str(response.resp_body))
-        if (400 == http_response.status_code):
-            raise BadRequestError(str(response))
-        elif (401 == http_response.status_code):
-            if ("expired_auth_token" == err.code):
-                raise ExpiredAuthError(str(response))
-            else:
-                raise UnauthorizedError(str(response))
-        else:
-            raise ApiParseError(str(response))
+        api.util.raise_appropriate_error(http_response)
+
+class DownloadFileByIdResult:
+    file_id = None
+    content_len = None
+    sha1 = None
+    payload = None
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                self.file_id = http_response.resp_headers["x-bz-file-id"]
+                self.content_len = http_response.resp_headers["Content-Length"]
+                self.sha1 = http_response.resp_headers["x-bz-content-sha1"]
+                self.payload = http_response.resp_body
+            except KeyError as e:
+                raise ApiParseError(str(response)) from e
+
+        err = ApiErrorResponse(str(http_response.resp_body))
 
 class UploadPart:
     part_num = None
@@ -114,15 +110,3 @@ class ListUnfinishedLargeFilesResult:
     def __init__(self, unfinished_files, next_file):
         self.unfinished_files = unfinished_files
         self.next_file = next_file
-
-class DownloadFileByIdResult:
-    file_id = None
-    content_len = None
-    sha1 = None
-    payload = None
-
-    def __init__(self, file_id, content_len, sha1, payload,):
-        self.file_id = file_id
-        self.content_len = content_len
-        self.sha1 = sha1
-        self.payload = payload
