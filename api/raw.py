@@ -175,13 +175,10 @@ def start_large_file(creds, bucket_id, dst_file_name):
             "contentType" : "application/octet-stream"}
     body = json.dumps(body)
 
-    response = api.util.send_request(local_api_url, util.http.Method.POST,
-                                     headers, body)
-    try:
-        return response["fileId"]
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
-        raise Bbb2Error.Bbb2Error(msg) from e
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+
+    return StartLargeFileResult(response)
 
 def upload_file(upload_url, upload_auth_token, dst_file_name,
                 src_file_path, src_file_sha1 = None):
@@ -199,17 +196,10 @@ def upload_file(upload_url, upload_auth_token, dst_file_name,
 
     body = util.util.get_entire_file(src_file_path)
 
-    response = api.util.send_request(upload_url, util.http.Method.POST,
-                                     headers, body)
-    try:
-        resp_body = json.loads(response.resp_body)
-        return {"bucket_id" : resp_body["bucketId"],
-                "hash_sha1" : resp_body["contentSha1"],
-                "file_id" : resp_body["fileId"],
-                "file_name" : resp_body["fileName"]}
-    except (json.JSONDecodeError, KeyError) as e:
-        msg = "Failed to parse response. " + str(response)
-        raise Bbb2Error.Bbb2Error(msg) from e
+    response = util.http.send_request(upload_url, util.http.Method.POST,
+                                      headers, body)
+
+    return UploadFileResult(response)
 
 def upload_part(upload_url, auth_token, part_num, part):
     hasher = hashlib.sha1()
@@ -221,11 +211,7 @@ def upload_part(upload_url, auth_token, part_num, part):
                "X-Bz-Content-Sha1" : hasher.hexdigest()}
     body = part
 
-    response = api.util.send_request(upload_url, util.http.Method.POST,
-                                     headers, body)
-    resp_body = json.loads(response.resp_body)
-    try:
-        return {"part_number" : resp_body["partNumber"],
-                "sha1_hash" : resp_body["contentSha1"]}
-    except (json.JSONDecodeError, KeyError) as e:
-        raise Bbb2Error.Bbb2Error(str(response)) from e
+    response = util.http.send_request(upload_url, util.http.Method.POST,
+                                      headers, body)
+
+    return UploadPartResult(response)

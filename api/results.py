@@ -223,3 +223,53 @@ class ListUnfinishedLargeFilesResult:
         else:
             api.util.raise_appropriate_error(http_response)
             assert False
+
+class StartLargeFileResult:
+    file_id = None
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.file_id = json_body["fileId"]
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False
+
+class UploadFileResult:
+    file_id = None
+    file_name = None
+    sha1 = None
+    bucket_id = None
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.file_id = json_body["fileId"]
+                self.file_name = json_body["fileName"]
+                self.sha1 = json_body["contentSha1"]
+                self.bucket_id = json_body["bucketId"]
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False
+
+class UploadPartResult:
+    part_number = None
+    sha1 = None
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.part_number = json_body["partNumber"]
+                self.sha1 = json_body["contentSha1"]
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False

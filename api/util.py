@@ -41,6 +41,7 @@ def raise_appropriate_error(http_response):
 
     if ((http.HTTPStatus.BAD_REQUEST == http_code)
         or (http.HTTPStatus.NOT_FOUND == http_code)
+        or (http.HTTPStatus.METHOD_NOT_ALLOWED == http_code)
         or (http.HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE == http_code)):
         raise BadRequestError(str(http_response))
     elif (http.HTTPStatus.UNAUTHORIZED == http_code):
@@ -52,6 +53,8 @@ def raise_appropriate_error(http_response):
             raise UnauthorizedError(str(http_response))
     elif (http.HTTPStatus.FORBIDDEN == http_code):
         raise RemoteResourceLimitError(str(http_response))
+    elif (http.HTTPStatus.REQUEST_TIMEOUT == http_code):
+        raise ConnectError(str(http_response))
     elif (http.HTTPStatus.SERVICE_UNAVAILABLE == http_code):
         raise RemoteError(str(http_response))
     else:
