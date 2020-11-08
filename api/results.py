@@ -15,8 +15,8 @@ class AuthorizeResult:
     rec_part_size_bytes = None
 
     def __init__(self, http_response):
-        if (http.HTTPStatus.OK == response.status_code):
-            json_body = json.loads(response.resp_body)
+        if (http.HTTPStatus.OK == http_response.status_code):
+            json_body = json.loads(http_response.resp_body)
             try:
                 self.account_id = json_body["accountId"]
                 self.auth_token = json_body["authorizationToken"]
@@ -25,9 +25,9 @@ class AuthorizeResult:
                 self.min_part_size_bytes = json_body["absoluteMinimumPartSize"]
                 self.rec_part_size_bytes = json_body["recommendedPartSize"]
             except (json.JSONDecodeError, KeyError) as e:
-                raise Bbb2Error.ApiParseError(str(response)) from e
+                raise Bbb2Error.ApiParseError(str(http_response)) from e
         else:
-            api.util.raise_appropriate_error(response)
+            api.util.raise_appropriate_error(http_response)
             assert False
 
 class CancelLargeFileResult:
@@ -37,7 +37,7 @@ class CancelLargeFileResult:
     file_name = None
 
     def __init__(self, http_response):
-        if (http.HTTPStatus.OK == response.status_code):
+        if (http.HTTPStatus.OK == http_response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
                 self.file_id = json_body["fileId"]
@@ -45,7 +45,7 @@ class CancelLargeFileResult:
                 self.bucket_id = json_body["bucketId"]
                 self.file_name = json_body["fileName"]
             except (json.JSONDecodeError, KeyError) as e:
-                raise ApiParseError(str(response))
+                raise ApiParseError(str(http_response))
         else:
             api.util.raise_appropriate_error(http_response)
             assert False
@@ -65,7 +65,7 @@ class DownloadFileByIdResult:
                 self.sha1 = http_response.resp_headers["x-bz-content-sha1"]
                 self.payload = http_response.resp_body
             except KeyError as e:
-                raise ApiParseError(str(response)) from e
+                raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropraite_error(http_response)
             assert False

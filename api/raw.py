@@ -33,7 +33,7 @@ def authorize(key_id: str, application_key: str) -> AuthorizeResult:
     response = util.http.send_request(AUTH_URL, util.http.Method.GET, headers,
                                       None)
 
-    return AuthorizeResult.from_http_response(response)
+    return AuthorizeResult(response)
 
 def cancel_large_file(creds, file_id):
     local_api_url = copy.deepcopy(creds.api_url)

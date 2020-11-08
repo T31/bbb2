@@ -206,7 +206,7 @@ def send_request(url, method, headers, body):
             = http.client.HTTPSConnection(host=str(url.domain))
         else:
             raise Bbb2Error.InternalError("Invalid protocol value in URL"
-                                           + " (" + str(url) + ").")
+                                          + " (" + str(url) + ").")
     try:
         if Method.GET == method:
             cached_connection.connection.request(method='GET', url=str(url),
@@ -216,7 +216,7 @@ def send_request(url, method, headers, body):
                                                  headers=headers, body=body)
         else:
             raise Bbb2Error.InternalError("Invalid HTTP method value"
-                                           + " (" + str(method) + ").")
+                                          + " (" + str(method) + ").")
 
         response = cached_connection.connection.getresponse()
 
