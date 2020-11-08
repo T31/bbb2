@@ -15,6 +15,9 @@ class AuthorizeResult:
     rec_part_size_bytes = None
 
     def __init__(self, http_response):
+        if (None == http_response):
+            return
+
         if (http.HTTPStatus.OK == http_response.status_code):
             json_body = json.loads(http_response.resp_body)
             try:

@@ -10,6 +10,7 @@ import http
 import json
 
 from api.results import AuthorizeResult
+from api.results import CancelLargeFileResult
 import api.util
 import Bbb2Error
 import util.http
