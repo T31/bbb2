@@ -49,6 +49,15 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+    
+    def test_finish_large_file(self):
+        try:
+            api.raw.finish_large_file(self.creds, "someFileId",
+                                      ["hash", "hash"])
+            self.assertTrue(True)
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
 
 if "__main__" == __name__:
     unittest.main()

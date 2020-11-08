@@ -12,6 +12,7 @@ import json
 from api.results import AuthorizeResult
 from api.results import CancelLargeFileResult
 from api.results import DownloadFileByIdResult
+from api.results import FinishLargeFileResult
 import api.util
 import Bbb2Error
 import util.http

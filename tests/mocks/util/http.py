@@ -44,6 +44,16 @@ def send_request(url, method, headers, body):
         resp_headers["x-bz-content-sha1"] = util.util.calc_sha1(payload)
         return util.http.Response(url, headers, body, http.HTTPStatus.OK,
                                   resp_headers, payload)
+    elif ((url.path == util.http.Path(["b2api", API_VERSION,
+                                       "b2_finish_large_file"]))
+          and (util.http.Method.POST == method)):
+        req_body = json.loads(body)
+        resp_body = dict()
+        resp_body["accountId"] = "someAccountId"
+        resp_body["bucketId"] = "someBucketId"
+        resp_body["fileId"] = req_body["fileId"]
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
     else:
         msg = "Bad request to mock send_request." \
               + " Url=" + str(url) \
