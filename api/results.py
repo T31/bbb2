@@ -14,30 +14,21 @@ class AuthorizeResult:
     min_part_size_bytes = None
     rec_part_size_bytes = None
 
-    def __init__(self, account_id, auth_token, api_url, download_url,
-                 min_part_size_bytes, rec_part_size_bytes):
-        self.account_id = account_id
-        self.auth_token = auth_token
-        self.api_url = util.http.Url.from_string(api_url)
-        self.download_url = util.http.Url.from_string(download_url)
-        self.min_part_size_bytes = min_part_size_bytes
-        self.rec_part_size_bytes = rec_part_size_bytes
-
-    @staticmethod
-    def from_http_response(response):
+    def __init__(self, http_response):
         if (http.HTTPStatus.OK == response.status_code):
             json_body = json.loads(response.resp_body)
             try:
-                return AuthorizeResult(resp_json["accountId"],
-                                       resp_json["authorizationToken"],
-                                       resp_json["apiUrl"],
-                                       resp_json["downloadUrl"],
-                                       resp_json["absoluteMinimumPartSize"],
-                                       resp_json["recommendedPartSize"])
+                self.account_id = resp_json["accountId"]
+                self.auth_token = resp_json["authorizationToken"]
+                self.api_url = resp_json["apiUrl"]
+                self.download_url = resp_json["downloadUrl"]
+                self.min_part_size_bytes = resp_json["absoluteMinimumPartSize"]
+                self.rec_part_size_bytes = resp_json["recommendedPartSize"]
             except (json.JSONDecodeError, KeyError) as e:
                 raise Bbb2Error.ApiParseError(str(response)) from e
-
-        api.util.raise_appropriate_error(response)
+        else:
+            api.util.raise_appropriate_error(response)
+            assert False
 
 class CancelLargeFileResult:
     file_id = None
@@ -53,11 +44,11 @@ class CancelLargeFileResult:
                 
                 self.bucket_id = json_body["bucketId"]
                 self.file_name = json_body["fileName"]
-                return
             except (json.JSONDecodeError, KeyError) as e:
                 raise ApiParseError(str(response))
-
-        api.util.raise_appropriate_error(http_response)
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False
 
 class DownloadFileByIdResult:
     file_id = None
@@ -74,8 +65,9 @@ class DownloadFileByIdResult:
                 self.payload = http_response.resp_body
             except KeyError as e:
                 raise ApiParseError(str(response)) from e
-
-        err = ApiErrorResponse(str(http_response.resp_body))
+        else:
+            api.util.raise_appropraite_error(http_response)
+            assert False
 
 class UploadPart:
     part_num = None
