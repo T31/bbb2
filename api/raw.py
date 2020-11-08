@@ -124,20 +124,11 @@ def list_file_names(creds, bucket_id):
                                          "b2_list_file_names"])
     headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"bucketId" : bucket_id})
-    try:
-        response = api.util.send_request(local_api_url,
-                                         util.http.Method.POST, headers,
-                                         body)
-        resp_body = json.loads(response.resp_body)
-        ret_val = dict()
-        for file in resp_body["files"]:
-            entry = {"contentLength" : file["contentLength"],
-                     "fileId" : file["fileId"]}
-            ret_val[file["fileName"]] = entry
-        return ret_val
-    except KeyError as e:
-        msg = "Failed to find key in response. " + str(response)
-        raise Bbb2Error.Bbb2Error(msg) from e
+
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+
+    return ListFileNamesResult(respones)
 
 def list_parts(creds, file_id, start_part = None):
     local_api_url = copy.deepcopy(creds.api_url)

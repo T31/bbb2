@@ -133,7 +133,35 @@ class ListBucketsResult:
             try:
                 json_body = json.loads(http_response.resp_body)
                 for bucket in json_body["buckets"]:
-                    buckets[bucket["bucketId"]] = bucket["bucketName"]
+                    self.buckets[bucket["bucketId"]] = bucket["bucketName"]
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False
+
+class FileNameEntry:
+    file_name = None
+    file_id = None
+    content_length = None
+
+    def __init__(self, file_name, file_id, content_length):
+        self.file_name = file_name
+        self.file_id = file_id
+        self.content_length = content_length
+
+class ListFileNamesResult:
+    file_names = []
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                for file_entry in json_body["files"]:
+                    new_entry = FileNameEntry(file_entry["fileName"],
+                                              file_entry["fileId"],
+                                              file_entry["contentLength"])
+                    self.file_names.append(new_entry)
             except (json.JSONDecodeError, KeyError) as e:
                 raise ApiParseError(str(http_response)) from e
         else:
