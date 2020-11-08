@@ -10,7 +10,6 @@ import util.http
 
 @patch('util.http.send_request', tests.mocks.util.http.send_request)
 class ApiRawTests(unittest.TestCase):
-
     @classmethod
     def setUpClass(self):
         self.creds = AuthorizeResult(None)
@@ -58,6 +57,3 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
-
-if "__main__" == __name__:
-    unittest.main()
