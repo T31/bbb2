@@ -3,6 +3,7 @@ import json
 
 from tests.test_errors import BadMockRequestError
 import util.http
+import util.util
 
 API_VERSION = "v2"
 
@@ -33,6 +34,16 @@ def send_request(url, method, headers, body):
         resp_body["fileName"] = "someFileName"
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
+    elif ((url.path[-1].find("b2_download_file_by_id?fileId=") != -1)
+          and (util.http.Method.POST == method)):
+        payload = bytes([0, 0, 0, 0])
+        req_body = json.loads(body)
+        resp_headers = dict()
+        resp_headers["x-bz-file-id"] = req_body["fileId"]
+        resp_headers["Content-Length"] = len(payload)
+        resp_headers["x-bz-content-sha1"] = util.util.calc_sha1(payload)
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK,
+                                  resp_headers, payload)
     else:
         msg = "Bad request to mock send_request." \
               + " Url=" + str(url) \

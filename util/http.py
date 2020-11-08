@@ -67,6 +67,9 @@ class Path:
 
         return retVal
 
+    def __getitem__(self, key):
+        return self.path[key]
+
 class Url:
     protocol = Protocol.HTTPS
     domain = Domain()

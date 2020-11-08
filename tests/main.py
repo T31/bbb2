@@ -34,5 +34,20 @@ class ApiRawTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    def test_download_file_by_id(self):
+        try:
+            creds = AuthorizeResult(None)
+            creds.auth_token = "someAuthToken"
+            creds.download_url = util.http.Url(util.http.Protocol.HTTPS,
+                                               util.http.Domain(["f000",
+                                                                 "backblazeb2",
+                                                                 "com"]),
+                                               util.http.Path([]))
+            api.raw.download_file_by_id(creds, "someFileId", 0, 10)
+            self.assertTrue(True)
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
+
 if "__main__" == __name__:
     unittest.main()
