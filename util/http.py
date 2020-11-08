@@ -219,9 +219,16 @@ def send_request(url, method, headers, body):
                                            + " (" + str(method) + ").")
 
         response = cached_connection.connection.getresponse()
+
+        resp_headers = dict()
+        for header in response.getheaders():
+            resp_headers[header[0]] = header[1]
+
         resp_body = response.read()
-        return Response(url, headers, body, response.status,
-                        response.getheaders(), resp_body)
+
+        return Response(url, headers, body, response.status, resp_headers,
+                        resp_body)
+
     except (http.client.IncompleteRead, BrokenPipeError,
             ConnectionResetError) as e:
         cached_connection.clear()

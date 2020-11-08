@@ -64,10 +64,6 @@ def download_file_by_id(creds, file_id, start_idx_inc, end_idx_inc):
                                      util.http.Method.POST, headers, body,
                                      good_status_codes)
 
-    resp_headers = dict()
-    for header in response.resp_headers:
-        resp_headers[header[0]] = header[1]
-
     return DownloadFileByIdResult(resp_headers["x-bz-file-id"],
                                   resp_headers["Content-Length"],
                                   resp_headers["x-bz-content-sha1"],
