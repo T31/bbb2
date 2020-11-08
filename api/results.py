@@ -5,6 +5,7 @@ from api.util import ApiErrorResponse
 from Bbb2Error import ApiParseError
 from Bbb2Error import BadRequestError
 from Bbb2Error import UnauthorizedError
+from util.http import Url
 
 class AuthorizeResult:
     account_id = None
@@ -97,11 +98,27 @@ class GetUploadPartUrlResult:
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
+                self.upload_part_url = Url.from_string(json_body["uploadUrl"])
                 self.upload_part_auth_token = json_body["authorizationToken"]
                 self.file_id = json_body["fileId"]
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False
 
-                url = util.http.Url.from_string(json_body["uploadUrl"])
-                self.upload_part_url = util.http.Url.from_string(url)
+class GetUploadUrlResult:
+    bucket_id = None
+    upload_url = None
+    upload_auth_token = None
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.bucket_id = json_body["bucketId"]
+                self.upload_url = Url.from_string(json_body["uploadUrl"])
+                self.upload_auth_token = json_body["authorizationToken"]
             except (json.JSONDecodeError, KeyError) as e:
                 raise ApiParseError(str(http_response)) from e
         else:

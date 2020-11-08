@@ -96,16 +96,10 @@ def get_upload_url(api_url, auth_token, bucket_id):
 
     headers = {"Authorization" : auth_token}
     body = json.dumps({"bucketId" : bucket_id})
-    response = api.util.send_request(local_api_url, util.http.Method.POST,
-                                     headers, body)
-    try:
-        resp_body = json.loads(response.resp_body)
-        return {"bucket_id" : resp_body["bucketId"],
-                "upload_url" : resp_body["uploadUrl"],
-                "upload_auth_token" : resp_body["authorizationToken"]}
-    except (json.JSONDecodeError, KeyError) as e:
-        msg = "Failed to parse response. " + str(response)
-        raise Bbb2Error.Bbb2Error(msg) from e
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+
+    return GetUploadUrlResult(response)
 
 def list_buckets(creds, bucket_name = None):
     local_api_url = copy.deepcopy(creds.api_url)
