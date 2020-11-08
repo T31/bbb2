@@ -48,5 +48,7 @@ def raise_appropriate_error(http_response):
             raise ExpiredAuthError(str(http_response))
         else:
             raise UnauthorizedError(str(http_response))
+    elif (http.HTTPStatus.SERVICE_UNAVAILABLE == http_response.status_code):
+        raise RemoteError(str(http_response))
     else:
         raise ApiParseError(str(http_response))

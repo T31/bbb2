@@ -88,6 +88,26 @@ class FinishLargeFileResult:
             api.util.raise_appropriate_error(http_response)
             assert False
 
+class GetUploadPartUrlResult:
+    upload_part_url = None
+    upload_part_auth_token = None
+    file_id = None
+
+    def __init__(self, http_response):
+        if (http.HTTPStatus.OK == http_response.status_code):
+            try:
+                json_body = json.loads(http_response.resp_body)
+                self.upload_part_auth_token = json_body["authorizationToken"]
+                self.file_id = json_body["fileId"]
+
+                url = util.http.Url.from_string(json_body["uploadUrl"])
+                self.upload_part_url = util.http.Url.from_string(url)
+            except (json.JSONDecodeError, KeyError) as e:
+                raise ApiParseError(str(http_response)) from e
+        else:
+            api.util.raise_appropriate_error(http_response)
+            assert False
+
 class UploadPart:
     part_num = None
     content_len = None

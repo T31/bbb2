@@ -83,15 +83,11 @@ def get_upload_part_url(creds, file_id):
 
     headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"fileId" : file_id})
-    response = api.util.send_request(local_api_url, util.http.Method.POST,
-                                     headers, body)
-    try:
-        resp_json = json.loads(response.resp_body)
-        return {"upload_part_url" : resp_json["uploadUrl"],
-                "upload_part_auth_token" : resp_json["authorizationToken"],
-                "file_id" : resp_json["fileId"]}
-    except (json.JSONDecodeError, KeyError) as e:
-        raise Bbb2Error.ApiParseError(str(response)) from e
+
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
+
+    return GetUploadPartUrlResult(response)
 
 def get_upload_url(api_url, auth_token, bucket_id):
     local_api_url = copy.deepcopy(api_url)
