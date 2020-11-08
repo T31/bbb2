@@ -132,8 +132,7 @@ def list_file_names(creds, bucket_id):
 
 def list_parts(creds, file_id, start_part = None):
     local_api_url = copy.deepcopy(creds.api_url)
-    local_api_url.path = util.http.Path(["b2api", API_VERSION,
-                                         "b2_list_parts"])
+    local_api_url.path = util.http.Path(["b2api", API_VERSION, "b2_list_parts"])
 
     headers = {"Authorization" : creds.auth_token}
 
@@ -142,23 +141,10 @@ def list_parts(creds, file_id, start_part = None):
         body["startPartNumber"] = start_part
     body = json.dumps(body)
 
-    try:
-        response = api.util.send_request(local_api_url, util.http.Method.POST,
-                                         headers, body)
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
 
-        resp_json = json.loads(response.resp_body)
-
-        upload_parts = dict()
-
-        for part in resp_json["parts"]:
-            upload_part = UploadPart(part["partNumber"],
-                                     part["contentLength"],
-                                     part["contentSha1"])
-            upload_parts[int(part["partNumber"])] = upload_part
-
-        return ListPartsResult(upload_parts, resp_json["nextPartNumber"])
-    except (json.JSONDecodeError, KeyError) as e:
-        raise Bbb2Error.ApiParseError(str(response)) from e
+    return ListPartsResult(response)
 
 def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
     local_api_url = copy.deepcopy(creds.api_url)
