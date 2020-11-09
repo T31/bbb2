@@ -53,3 +53,10 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_get_upload_part_url(self):
+        try:
+            api.raw.get_upload_part_url(self.creds, "someFileId")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)

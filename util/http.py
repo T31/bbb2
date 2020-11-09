@@ -89,7 +89,7 @@ class Url:
                 and (self.path == other.path))
 
     @staticmethod
-    def from_string(self, url_string):
+    def from_string(url_string):
         start_idx_inc = 0
         end_idx_ex = url_string.find("://")
         if -1 == end_idx_ex:
