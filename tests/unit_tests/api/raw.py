@@ -75,3 +75,10 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_list_file_names(self):
+        try:
+            api.raw.list_file_names(self.creds, "someBucketId")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)

@@ -140,7 +140,7 @@ def list_file_names(creds, bucket_id):
     response = util.http.send_request(local_api_url, util.http.Method.POST,
                                       headers, body)
 
-    return ListFileNamesResult(respones)
+    return ListFileNamesResult(response)
 
 def list_parts(creds, file_id, start_part = None):
     local_api_url = copy.deepcopy(creds.api_url)

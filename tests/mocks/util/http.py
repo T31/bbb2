@@ -77,10 +77,22 @@ def send_request(url, method, headers, body):
                                        "b2_list_buckets"]))
           and (util.http.Method.POST == method)):
         resp_body = dict()
-        resp_body["buckets"] = [{"bucketId":"someBucketId",
-                                 "bucketName":"someBucketName"},
-                                {"bucketId":"anotherBucketId",
-                                 "bucketName":"anotherBucketName"}]
+        resp_body["buckets"] = [{"bucketId" : "someBucketId",
+                                 "bucketName" : "someBucketName"},
+                                {"bucketId" : "anotherBucketId",
+                                 "bucketName" : "anotherBucketName"}]
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
+    elif ((url.path == util.http.Path(["b2api", API_VERSION,
+                                       "b2_list_file_names"]))
+          and (util.http.Method.POST == method)):
+        resp_body = dict()
+        resp_body["files"] = [{"fileName" : "someFileName",
+                               "fileId" : "someFileId",
+                               "contentLength" : 100},
+                              {"fileName" : "someOtherFileName",
+                               "fileId" : "someOtherFileId",
+                               "contentLength" : 200}]
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
     else:
