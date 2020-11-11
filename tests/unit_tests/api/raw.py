@@ -99,3 +99,10 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_start_large_file(self):
+        try:
+            api.raw.start_large_file(self.creds, "someBucketId", "someFileName")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)

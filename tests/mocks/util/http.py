@@ -119,6 +119,12 @@ def send_request(url, method, headers, body):
         resp_body["nextFileId"] = "nextUnfinishedFileId"
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
+    elif ((url.path == util.http.Path(["b2api", API_VERSION,
+                                       "b2_start_large_file"]))
+          and (util.http.Method.POST == method)):
+        resp_body = {"fileId" : "someFileId"}
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
     else:
         msg = "Bad request to mock send_request." \
               + " Url=" + str(url) \
