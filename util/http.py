@@ -93,7 +93,7 @@ class Url:
         start_idx_inc = 0
         end_idx_ex = url_string.find("://")
         if -1 == end_idx_ex:
-            raise Bbb2Error.Bbb2Error("Malformed URL (" + url_string + ").")
+            raise Bbb2Error.InternalError("Malformed URL (" + url_string + ").")
 
         protocol = None
         proto_string = url_string[start_idx_inc:end_idx_ex]
