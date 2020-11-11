@@ -101,12 +101,12 @@ def get_upload_part_url(creds, file_id):
 
     return GetUploadPartUrlResult(response)
 
-def get_upload_url(api_url, auth_token, bucket_id):
-    local_api_url = copy.deepcopy(api_url)
+def get_upload_url(creds, bucket_id):
+    local_api_url = copy.deepcopy(creds.api_url)
     local_api_url.path = util.http.Path(["b2api", API_VERSION,
                                          "b2_get_upload_url"])
 
-    headers = {"Authorization" : auth_token}
+    headers = {"Authorization" : creds.auth_token}
     body = json.dumps({"bucketId" : bucket_id})
     response = util.http.send_request(local_api_url, util.http.Method.POST,
                                       headers, body)
