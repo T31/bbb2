@@ -67,3 +67,11 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_list_buckets(self):
+        try:
+            api.raw.list_buckets(self.creds, "someBucketName")
+            api.raw.list_buckets(self.creds)
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
