@@ -60,3 +60,10 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_get_upload_url(self):
+        try:
+            api.raw.get_upload_url(self.creds, "someBucketId")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)

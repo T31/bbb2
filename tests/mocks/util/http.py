@@ -63,6 +63,16 @@ def send_request(url, method, headers, body):
         resp_body["uploadUrl"] = "https://pod-000-1016-09.backblaze.com/b2api/"
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
+    elif ((url.path == util.http.Path(["b2api", API_VERSION,
+                                       "b2_get_upload_url"]))
+          and (util.http.Method.POST == method)):
+        req_body = json.loads(body)
+        resp_body = dict()
+        resp_body["bucketId"] = req_body["bucketId"]
+        resp_body["uploadUrl"] = "https://url.backablaze.com/upload"
+        resp_body["authorizationToken"] = "someAuthToken"
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
     else:
         msg = "Bad request to mock send_request." \
               + " Url=" + str(url) \
