@@ -82,3 +82,11 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_list_parts(self):
+        try:
+            api.raw.list_parts(self.creds, "someFileId")
+            api.raw.list_parts(self.creds, "someFileId", 3)
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)

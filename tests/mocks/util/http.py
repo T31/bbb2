@@ -95,6 +95,19 @@ def send_request(url, method, headers, body):
                                "contentLength" : 200}]
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
+    elif ((url.path == util.http.Path(["b2api", API_VERSION, "b2_list_parts"]))
+          and (util.http.Method.POST == method)):
+        resp_body = dict()
+        parts = [{"partNumber" : 0,
+                  "contentSha1" : util.util.calc_sha1(bytes([0, 1])),
+                  "contentLength" : 2},
+                 {"partNumber" : 1,
+                  "contentSha1" : util.util.calc_sha1(bytes([1])),
+                  "contentLength" : 1}]
+        resp_body["parts"] = parts
+        resp_body["nextPartNumber"] = 3
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
     else:
         msg = "Bad request to mock send_request." \
               + " Url=" + str(url) \
