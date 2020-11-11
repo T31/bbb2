@@ -170,8 +170,8 @@ def list_unfinished_large_files(creds, bucket_id, start_file_id = None):
         body["startFileId"] = start_file_id
     body = json.dumps(body)
 
-    response = api.util.send_request(local_api_url, util.http.Method.POST,
-                                     headers, body)
+    response = util.http.send_request(local_api_url, util.http.Method.POST,
+                                      headers, body)
 
     return ListUnfinishedLargeFilesResult(response)
 

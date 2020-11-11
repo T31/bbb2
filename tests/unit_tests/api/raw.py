@@ -90,3 +90,12 @@ class ApiRawTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_list_unfinished_large_files(self):
+        try:
+            api.raw.list_unfinished_large_files(self.creds, "someBucketId")
+            api.raw.list_unfinished_large_files(self.creds, "someBucketId",
+                                                "someFileId")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
