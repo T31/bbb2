@@ -1,7 +1,7 @@
 import hashlib
 import os.path
 
-import Bbb2Error
+from Bbb2Error import InternalError
 
 def get_file_len_bytes(file_path):
     file_size = None
@@ -10,7 +10,7 @@ def get_file_len_bytes(file_path):
     except OSError as e:
         msg = ("Failed to get file size."
                " SrcFilePath=\"" + str(file_path) + "\".")
-        raise Bbb2Error.Bbb2Error(msg) from e
+        raise InternalError(msg) from e
 
 def gen_fraction_percent_str(numerator, denominator):
     fraction = str(numerator) + "/" + str(denominator)
@@ -46,7 +46,7 @@ def get_entire_file(file_path):
         file_stream = open(file=file_path, mode='rb')
     except OSError as e:
         msg = "Failed to read file \"" + str(file_path) + "\"."
-        raise Bbb2Error.Bbb2Error(msg) from e
+        raise InternalError(msg) from e
 
     try:
         return file_stream.read()
