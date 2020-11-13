@@ -70,6 +70,9 @@ class Path:
     def __getitem__(self, key):
         return self.path[key]
 
+    def __bool__(self):
+        return len(self.path) != 0
+
 class Url:
     protocol = Protocol.HTTPS
     domain = Domain()
@@ -125,7 +128,7 @@ class Url:
             start_idx_inc += len("/")
             path_list = url_string[start_idx_inc:].split("/")
 
-        return Url(protocol, domain_list, path_list)
+        return Url(protocol, Domain(domain_list), Path(path_list))
 
     def set_from_string(self, url: str):
         self = from_string(url)
