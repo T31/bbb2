@@ -5,10 +5,14 @@ import traceback
 import api.raw
 from api.results import AuthorizeResult
 import tests.mocks.util.http
+import tests.mocks.util.util
 from tests.test_errors import BadMockRequestError
 import util.http
 
 @patch('util.http.send_request', tests.mocks.util.http.send_request)
+@patch('util.util.calc_sha1_file', tests.mocks.util.util.calc_sha1_file)
+@patch('util.util.get_entire_file', tests.mocks.util.util.get_entire_file)
+@patch('util.util.get_file_len_bytes', tests.mocks.util.util.get_file_len_bytes)
 class ApiRawTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -103,6 +107,23 @@ class ApiRawTests(unittest.TestCase):
     def test_start_large_file(self):
         try:
             api.raw.start_large_file(self.creds, "someBucketId", "someFileName")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
+
+    def test_upload_file(self):
+        try:
+            upload_url = util.http.Url.from_string("https://up.backblaze.com")
+            api.raw.upload_file(upload_url, "someUploadAuthToken",
+                                "someDstFileName", "someSrcFile")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
+
+    @unittest.skip("For now")
+    def test_upload_part(self):
+        try:
+            api.raw.upload_part(self.creds, "someBucketId", "someFileName")
         except:
             traceback.print_exc()
             self.assertTrue(False)

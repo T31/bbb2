@@ -34,7 +34,8 @@ def send_request(url, method, headers, body):
         resp_body["fileName"] = "someFileName"
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
-    elif ((url.path[-1].find("b2_download_file_by_id?fileId=") != -1)
+    elif (url.path
+          and (url.path[-1].find("b2_download_file_by_id?fileId=") != -1)
           and (util.http.Method.POST == method)):
         payload = bytes([0, 0, 0, 0])
         req_body = json.loads(body)
@@ -123,6 +124,13 @@ def send_request(url, method, headers, body):
                                        "b2_start_large_file"]))
           and (util.http.Method.POST == method)):
         resp_body = {"fileId" : "someFileId"}
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
+    elif ("X-Bz-File-Name" in headers):
+        resp_body = {"fileId" : "someFileId",
+                     "fileName" : "someFileName",
+                     "contentSha1" : util.util.calc_sha1(bytes([6, 3])),
+                     "bucketId" : "someBucketId"}
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
     else:

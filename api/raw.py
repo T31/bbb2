@@ -192,8 +192,8 @@ def start_large_file(creds, bucket_id, dst_file_name):
 
     return StartLargeFileResult(response)
 
-def upload_file(upload_url, upload_auth_token, dst_file_name,
-                src_file_path, src_file_sha1 = None):
+def upload_file(upload_url, upload_auth_token, dst_file_name, src_file_path,
+                src_file_sha1 = None):
     file_len = str(util.util.get_file_len_bytes(src_file_path))
 
     headers = {"Authorization" : upload_auth_token,
