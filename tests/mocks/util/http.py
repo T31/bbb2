@@ -133,6 +133,11 @@ def send_request(url, method, headers, body):
                      "bucketId" : "someBucketId"}
         return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
                                   json.dumps(resp_body))
+    elif ("X-Bz-Part-Number" in headers):
+        resp_body = {"partNumber" : headers["X-Bz-Part-Number"],
+                     "contentSha1" : util.util.calc_sha1(body)}
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
     else:
         msg = "Bad request to mock send_request." \
               + " Url=" + str(url) \

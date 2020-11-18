@@ -29,6 +29,8 @@ class ApiRawTests(unittest.TestCase):
                                                                   "com"]),
                                                 util.http.Path([]))
 
+        self.upload_url = util.http.Url.from_string("https://up.backblaze.com")
+
     def test_authorize(self):
         try:
             api.raw.authorize("someKeyId", "someAppKey")
@@ -113,17 +115,16 @@ class ApiRawTests(unittest.TestCase):
 
     def test_upload_file(self):
         try:
-            upload_url = util.http.Url.from_string("https://up.backblaze.com")
-            api.raw.upload_file(upload_url, "someUploadAuthToken",
+            api.raw.upload_file(self.upload_url, "someUploadAuthToken",
                                 "someDstFileName", "someSrcFile")
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
-    @unittest.skip("For now")
     def test_upload_part(self):
         try:
-            api.raw.upload_part(self.creds, "someBucketId", "someFileName")
+            api.raw.upload_part(self.upload_url, "someAuthToken", 20,
+                                bytes([5, 5,]))
         except:
             traceback.print_exc()
             self.assertTrue(False)
