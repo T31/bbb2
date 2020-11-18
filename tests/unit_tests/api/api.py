@@ -2,18 +2,17 @@ import unittest
 from unittest.mock import patch
 import traceback
 
-from api.raw import RawApi
+from api.api import Api
 from api.results import AuthorizeResult
 import tests.mocks.util.http
 import tests.mocks.util.util
-from tests.test_errors import BadMockRequestError
 import util.http
 
 @patch('util.http.send_request', tests.mocks.util.http.send_request)
 @patch('util.util.calc_sha1_file', tests.mocks.util.util.calc_sha1_file)
 @patch('util.util.get_entire_file', tests.mocks.util.util.get_entire_file)
 @patch('util.util.get_file_len_bytes', tests.mocks.util.util.get_file_len_bytes)
-class ApiRawTests(unittest.TestCase):
+class ApiApiInheritedTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.creds = AuthorizeResult(None)
@@ -33,28 +32,28 @@ class ApiRawTests(unittest.TestCase):
 
     def test_authorize(self):
         try:
-            RawApi.authorize("someKeyId", "someAppKey")
+            Api.authorize("someKeyId", "someAppKey")
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_cancel_large_file(self):
         try:
-            RawApi.cancel_large_file(self.creds, "someFileId")
+            Api.cancel_large_file(self.creds, "someFileId")
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_download_file_by_id(self):
         try:
-            RawApi.download_file_by_id(self.creds, "someFileId", 0, 3)
+            Api.download_file_by_id(self.creds, "someFileId", 0, 3)
         except:
             traceback.print_exc()
             self.assertTrue(False)
     
     def test_finish_large_file(self):
         try:
-            RawApi.finish_large_file(self.creds, "someFileId",
+            Api.finish_large_file(self.creds, "someFileId",
                                       ["hash", "hash"])
         except:
             traceback.print_exc()
@@ -62,45 +61,45 @@ class ApiRawTests(unittest.TestCase):
 
     def test_get_upload_part_url(self):
         try:
-            RawApi.get_upload_part_url(self.creds, "someFileId")
+            Api.get_upload_part_url(self.creds, "someFileId")
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_get_upload_url(self):
         try:
-            RawApi.get_upload_url(self.creds, "someBucketId")
+            Api.get_upload_url(self.creds, "someBucketId")
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_list_buckets(self):
         try:
-            RawApi.list_buckets(self.creds, "someBucketName")
-            RawApi.list_buckets(self.creds)
+            Api.list_buckets(self.creds, "someBucketName")
+            Api.list_buckets(self.creds)
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_list_file_names(self):
         try:
-            RawApi.list_file_names(self.creds, "someBucketId")
+            Api.list_file_names(self.creds, "someBucketId")
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_list_parts(self):
         try:
-            RawApi.list_parts(self.creds, "someFileId")
-            RawApi.list_parts(self.creds, "someFileId", 3)
+            Api.list_parts(self.creds, "someFileId")
+            Api.list_parts(self.creds, "someFileId", 3)
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_list_unfinished_large_files(self):
         try:
-            RawApi.list_unfinished_large_files(self.creds, "someBucketId")
-            RawApi.list_unfinished_large_files(self.creds, "someBucketId",
+            Api.list_unfinished_large_files(self.creds, "someBucketId")
+            Api.list_unfinished_large_files(self.creds, "someBucketId",
                                                 "someFileId")
         except:
             traceback.print_exc()
@@ -108,14 +107,14 @@ class ApiRawTests(unittest.TestCase):
 
     def test_start_large_file(self):
         try:
-            RawApi.start_large_file(self.creds, "someBucketId", "someFileName")
+            Api.start_large_file(self.creds, "someBucketId", "someFileName")
         except:
             traceback.print_exc()
             self.assertTrue(False)
 
     def test_upload_file(self):
         try:
-            RawApi.upload_file(self.upload_url, "someUploadAuthToken",
+            Api.upload_file(self.upload_url, "someUploadAuthToken",
                                 "someDstFileName", "someSrcFile")
         except:
             traceback.print_exc()
@@ -123,7 +122,7 @@ class ApiRawTests(unittest.TestCase):
 
     def test_upload_part(self):
         try:
-            RawApi.upload_part(self.upload_url, "someAuthToken", 20,
+            Api.upload_part(self.upload_url, "someAuthToken", 20,
                                 bytes([5, 5,]))
         except:
             traceback.print_exc()
