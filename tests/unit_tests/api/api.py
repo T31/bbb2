@@ -127,3 +127,30 @@ class ApiApiInheritedTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+class ApiApiTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(self):
+        self.creds = AuthorizeResult(None)
+        self.creds.auth_token = "someAuthToken"
+        self.creds.api_url = util.http.Url(util.http.Protocol.HTTPS,
+                                           util.http.Domain(["api000",
+                                                             "backblazeb2",
+                                                             "com"]),
+                                           util.http.Path([]))
+        self.creds.download_url = util.http.Url(util.http.Protocol.HTTPS,
+                                                util.http.Domain(["f000",
+                                                                  "backblazeb2",
+                                                                  "com"]),
+                                                util.http.Path([]))
+
+        self.creds.MAX_UPLOAD_PARTS = 10000
+
+    @patch('util.http.send_request',
+           tests.mocks.util.http.send_request_list_all_parts)
+    def test_list_all_parts(self):
+        try:
+            Api.list_all_parts(self.creds, "someFileId")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)

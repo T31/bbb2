@@ -5,28 +5,31 @@ import http
 import json
 
 from api.raw import RawApi
+from api.results import ListPartsResult
 import api.util
 import Bbb2Error
+import log
 import util.http
 import util.util
 
 class Api(RawApi):
     @staticmethod
     def list_all_parts(creds, file_id):
-        result_list = [BackblazeB2Api.list_parts(creds, file_id)]
+        all_upload_parts = [RawApi.list_parts(creds, file_id)]
 
-        while ((None != result_list[-1].next_part)
-                and (result_list[-1].next_part <= creds.MAX_UPLOAD_PARTS)):
-            result = BackblazeB2Api.list_parts(creds, file_id,
-                                               result_list[-1].next_part)
-            result_list.append(result)
+        while ((None != all_upload_parts[-1].next_part)
+                and (all_upload_parts[-1].next_part <= creds.MAX_UPLOAD_PARTS)):
+            cur_part = RawApi.list_parts(creds, file_id,
+                                         all_upload_parts[-1].next_part)
+            all_upload_parts.append(cur_part)
 
-        all_upload_parts = dict()
-        for result in result_list:
-            for part_num in result.upload_parts:
-                all_upload_parts[part_num] = result.upload_parts[part_num]
+        complete_upload = ListPartsResult()
+        for part in all_upload_parts:
+            for part_num in part.upload_parts:
+                complete_upload.upload_parts[part_num] \
+                = part.upload_parts[part_num]
 
-        return BackblazeB2Api.ListPartsResult(all_upload_parts, None)
+        return complete_upload
 
     @staticmethod
     def list_all_unfinished_large_files(creds, bucket_id):

@@ -1,6 +1,7 @@
 import http
 import json
 
+from Bbb2Error import Bbb2Error
 from tests.test_errors import BadMockRequestError
 import util.http
 import util.util
@@ -145,3 +146,44 @@ def send_request(url, method, headers, body):
               + ", Headers=" + str(headers) \
               + ", Body=" + str(body)
         raise BadMockRequestError(msg)
+
+def send_request_list_all_parts(url, method, headers, body):
+    if ((url.path != util.http.Path(["b2api", API_VERSION, "b2_list_parts"]))
+        or (util.http.Method.POST != method)):
+        msg = "Bad request to mock send_request_list_all_parts." \
+              + " Url=" + str(url) \
+              + ", Method=" + method.name \
+              + ", Headers=" + str(headers) \
+              + ", Body=" + str(body)
+        raise BadMockRequestError(msg)
+
+    try:
+        start_part = 1
+        req_body_json = json.loads(body)
+        if "startPartNumber" in req_body_json:
+            start_part = req_body_json["startPartNumber"]
+
+        resp_body = dict()
+
+        parts = [{"partNumber" : start_part,
+                  "contentSha1" : util.util.calc_sha1(bytes([0, 1])),
+                  "contentLength" : 2},
+                 {"partNumber" : start_part + 1,
+                  "contentSha1" : util.util.calc_sha1(bytes([1])),
+                  "contentLength" : 1}]
+        resp_body["parts"] = parts
+
+        if start_part > 10:
+            resp_body["nextPartNumber"] = None
+        else:
+            resp_body["nextPartNumber"] = start_part + 2
+
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
+    except (Bbb2Error, KeyError) as e:
+        msg = "Bad request to mock send_request_list_all_parts." \
+              + " Url=" + str(url) \
+              + ", Method=" + method.name \
+              + ", Headers=" + str(headers) \
+              + ", Body=" + str(body)
+        raise BadMockRequestError(msg) from e
