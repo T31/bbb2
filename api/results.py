@@ -181,10 +181,13 @@ class UploadPart:
         self.sha1 = sha1
 
 class ListPartsResult:
-    upload_parts = []
+    upload_parts = dict()
     next_part = None
 
-    def __init__(self, http_response):
+    def __init__(self, http_response = None):
+        if None == http_response:
+            return
+
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
@@ -193,7 +196,7 @@ class ListPartsResult:
                     new_part = UploadPart(part["partNumber"],
                                           part["contentLength"],
                                           part["contentSha1"])
-                    self.upload_parts.append(new_part)
+                    self.upload_parts[new_part.part_num] = new_part
             except (json.JSONDecodeError, KeyError) as e:
                 raise ApiParseError(str(http_response)) from e
         else:
