@@ -7,14 +7,14 @@ from Bbb2Error import UnauthorizedError
 from util.http import Url
 
 class AuthorizeResult:
-    account_id = None
-    auth_token = None
-    api_url = None
-    download_url = None
-    min_part_size_bytes = None
-    rec_part_size_bytes = None
-
     def __init__(self, http_response):
+        self.account_id = None
+        self.auth_token = None
+        self.api_url = None
+        self.download_url = None
+        self.min_part_size_bytes = None
+        self.rec_part_size_bytes = None
+
         if (None == http_response):
             return
 
@@ -34,17 +34,11 @@ class AuthorizeResult:
             assert False
 
 class CancelLargeFileResult:
-    file_id = None
-    account_id = None
-    bucket_id = None
-    file_name = None
-
     def __init__(self, http_response):
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
                 self.file_id = json_body["fileId"]
-                
                 self.bucket_id = json_body["bucketId"]
                 self.file_name = json_body["fileName"]
             except (json.JSONDecodeError, KeyError) as e:
@@ -54,11 +48,6 @@ class CancelLargeFileResult:
             assert False
 
 class DownloadFileByIdResult:
-    file_id = None
-    content_len = None
-    sha1 = None
-    payload = None
-
     def __init__(self, http_response):
         if ((http.HTTPStatus.OK == http_response.status_code)
             or (http.HTTPStatus.PARTIAL_CONTENT == http_response.status_code)):
@@ -74,10 +63,6 @@ class DownloadFileByIdResult:
             assert False
 
 class FinishLargeFileResult:
-    account_id = None
-    bucket_id = None
-    file_id = None
-
     def __init__(self, http_response):
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
@@ -92,10 +77,6 @@ class FinishLargeFileResult:
             assert False
 
 class GetUploadPartUrlResult:
-    upload_part_url = None
-    upload_part_auth_token = None
-    file_id = None
-
     def __init__(self, http_response):
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
@@ -110,10 +91,6 @@ class GetUploadPartUrlResult:
             assert False
 
 class GetUploadUrlResult:
-    bucket_id = None
-    upload_url = None
-    upload_auth_token = None
-
     def __init__(self, http_response):
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
@@ -128,9 +105,9 @@ class GetUploadUrlResult:
             assert False
 
 class ListBucketsResult:
-    buckets = dict()
-
     def __init__(self, http_response):
+        self.buckets = dict()
+
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
@@ -143,19 +120,15 @@ class ListBucketsResult:
             assert False
 
 class FileNameEntry:
-    file_name = None
-    file_id = None
-    content_length = None
-
     def __init__(self, file_name, file_id, content_length):
         self.file_name = file_name
         self.file_id = file_id
         self.content_length = content_length
 
 class ListFileNamesResult:
-    file_names = []
-
     def __init__(self, http_response):
+        self.file_names = []
+
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
@@ -171,20 +144,16 @@ class ListFileNamesResult:
             assert False
 
 class UploadPart:
-    part_num = None
-    content_len = None
-    sha1 = None
-
     def __init__(self, part_num, content_len, sha1):
         self.part_num = part_num
         self.content_len = content_len
         self.sha1 = sha1
 
 class ListPartsResult:
-    upload_parts = dict()
-    next_part = None
-
     def __init__(self, http_response = None):
+        self.upload_parts = dict()
+        self.next_part = None
+
         if None == http_response:
             return
 
@@ -204,18 +173,15 @@ class ListPartsResult:
             assert False
 
 class UnfinishedLargeFile:
-    file_id = None
-    file_name = None
-
     def __init__(self, file_id, file_name):
         self.file_id = file_id
         self.file_name = file_name
 
 class ListUnfinishedLargeFilesResult:
-    unfinished_files = []
-    next_file = None
-
     def __init__(self, http_response):
+        self.unfinished_files = []
+        self.next_file = None
+
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
                 json_body = json.loads(http_response.resp_body)
@@ -231,8 +197,6 @@ class ListUnfinishedLargeFilesResult:
             assert False
 
 class StartLargeFileResult:
-    file_id = None
-
     def __init__(self, http_response):
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
@@ -245,11 +209,6 @@ class StartLargeFileResult:
             assert False
 
 class UploadFileResult:
-    file_id = None
-    file_name = None
-    sha1 = None
-    bucket_id = None
-
     def __init__(self, http_response):
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
@@ -265,9 +224,6 @@ class UploadFileResult:
             assert False
 
 class UploadPartResult:
-    part_number = None
-    sha1 = None
-
     def __init__(self, http_response):
         if (http.HTTPStatus.OK == http_response.status_code):
             try:
