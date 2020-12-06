@@ -8,7 +8,7 @@ import copy
 import hashlib
 import json
 
-from api.results import AuthorizeResult
+from api.results import AuthorizeAccountResult
 from api.results import CancelLargeFileResult
 from api.results import DownloadFileByIdResult
 from api.results import FinishLargeFileResult
@@ -28,7 +28,7 @@ API_VERSION = "v2"
 
 class RawApi:
     @staticmethod
-    def authorize(key_id: str, application_key: str) -> AuthorizeResult:
+    def authorize_account(key_id, application_key):
         auth = key_id + ":" + application_key
         auth = auth.encode(encoding='utf-8')
         auth = base64.b64encode(auth)
@@ -41,10 +41,10 @@ class RawApi:
                                  util.http.Path(["b2api", API_VERSION,
                                                  "b2_authorize_account"]))
 
-        response = util.http.send_request(AUTH_URL, util.http.Method.GET, headers,
-                                          None)
+        response = util.http.send_request(AUTH_URL, util.http.Method.GET,
+                                          headers, None)
 
-        return AuthorizeResult(response)
+        return AuthorizeAccountResult(response)
 
     @staticmethod
     def cancel_large_file(creds, file_id):

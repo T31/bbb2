@@ -3,7 +3,7 @@ from unittest.mock import patch
 import traceback
 
 from api.raw import RawApi
-from api.results import AuthorizeResult
+from api.results import AuthorizeAccountResult
 import tests.mocks.util.http
 import tests.mocks.util.util
 from tests.test_errors import BadMockRequestError
@@ -16,7 +16,7 @@ import util.http
 class ApiRawTests(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.creds = AuthorizeResult(None)
+        self.creds = AuthorizeAccountResult(None)
         self.creds.auth_token = "someAuthToken"
         self.creds.api_url = util.http.Url(util.http.Protocol.HTTPS,
                                            util.http.Domain(["api000",
@@ -31,9 +31,9 @@ class ApiRawTests(unittest.TestCase):
 
         self.upload_url = util.http.Url.from_string("https://up.backblaze.com")
 
-    def test_authorize(self):
+    def test_authorize_account(self):
         try:
-            RawApi.authorize("someKeyId", "someAppKey")
+            RawApi.authorize_account("someKeyId", "someAppKey")
         except:
             traceback.print_exc()
             self.assertTrue(False)

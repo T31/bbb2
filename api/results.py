@@ -6,7 +6,7 @@ from Bbb2Error import BadRequestError
 from Bbb2Error import UnauthorizedError
 from util.http import Url
 
-class AuthorizeResult:
+class AuthorizeAccountResult:
     def __init__(self, http_response):
         self.account_id = None
         self.auth_token = None
