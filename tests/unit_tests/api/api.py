@@ -147,10 +147,19 @@ class ApiApiTests(unittest.TestCase):
         self.creds.MAX_UPLOAD_PARTS = 10000
 
     @patch('util.http.send_request',
-           tests.mocks.util.http.send_request_list_all_parts)
+           tests.mocks.util.http.send_request_list_all_upload_parts)
     def test_list_all_parts(self):
         try:
             Api.list_all_parts(self.creds, "someFileId")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
+
+    @patch('util.http.send_request',
+           tests.mocks.util.http.send_request_list_all_unfinished_large_files)
+    def test_list_all_unfinished_large_files(self):
+        try:
+            Api.list_all_unfinished_large_files(self.creds, "someBucketId")
         except:
             traceback.print_exc()
             self.assertTrue(False)

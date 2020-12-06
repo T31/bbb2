@@ -178,9 +178,12 @@ class UnfinishedLargeFile:
         self.file_name = file_name
 
 class ListUnfinishedLargeFilesResult:
-    def __init__(self, http_response):
+    def __init__(self, http_response = None):
         self.unfinished_files = []
         self.next_file = None
+
+        if None == http_response:
+            return
 
         if (http.HTTPStatus.OK == http_response.status_code):
             try:

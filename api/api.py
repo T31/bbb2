@@ -6,6 +6,7 @@ import json
 
 from api.raw import RawApi
 from api.results import ListPartsResult
+from api.results import ListUnfinishedLargeFilesResult
 import api.util
 import Bbb2Error
 import log
@@ -33,20 +34,17 @@ class Api(RawApi):
 
     @staticmethod
     def list_all_unfinished_large_files(creds, bucket_id):
-        list_of_lists = [BackblazeB2Api.list_unfinished_large_files(creds,
-                                                                    bucket_id)]
+        all_parts = [RawApi.list_unfinished_large_files(creds, bucket_id)]
 
-        while None != list_of_lists[-1].next_file:
-            next_file_id = list_of_lists[-1].next_file
-            new_list = BackblazeB2Api.list_unfinished_large_files(creds,
-                                                                  bucket_id,
-                                                                  next_file_id)
-            list_of_lists.append(new_list)
+        while None != all_parts[-1].next_file:
+            next_file_id = all_parts[-1].next_file
+            next_part = RawApi.list_unfinished_large_files(creds, bucket_id,
+                                                           next_file_id)
+            all_parts.append(next_part)
 
-        complete_list = []
-        for inner_list in list_of_lists:
-            for unfinished_large_file in inner_list.unfinished_files:
-                complete_list.append(unfinished_large_file)
+        complete_result = ListUnfinishedLargeFilesResult()
+        for part in all_parts:
+            for unfinished_file in part.unfinished_files:
+                complete_result.unfinished_files.append(unfinished_file)
 
-        return BackblazeB2Api.ListUnfinishedLargeFilesResult(complete_list,
-                                                             None)
+        return complete_result

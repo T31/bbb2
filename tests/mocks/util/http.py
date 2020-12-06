@@ -1,4 +1,5 @@
 import http
+import inspect
 import json
 
 from Bbb2Error import Bbb2Error
@@ -147,7 +148,7 @@ def send_request(url, method, headers, body):
               + ", Body=" + str(body)
         raise BadMockRequestError(msg)
 
-def send_request_list_all_parts(url, method, headers, body):
+def send_request_list_all_upload_parts(url, method, headers, body):
     if ((url.path != util.http.Path(["b2api", API_VERSION, "b2_list_parts"]))
         or (util.http.Method.POST != method)):
         msg = "Bad request to mock send_request_list_all_parts." \
@@ -182,6 +183,46 @@ def send_request_list_all_parts(url, method, headers, body):
                                   json.dumps(resp_body))
     except (Bbb2Error, KeyError) as e:
         msg = "Bad request to mock send_request_list_all_parts." \
+              + " Url=" + str(url) \
+              + ", Method=" + method.name \
+              + ", Headers=" + str(headers) \
+              + ", Body=" + str(body)
+        raise BadMockRequestError(msg) from e
+
+def send_request_list_all_unfinished_large_files(url, method, headers, body):
+    if ((url.path != util.http.Path(["b2api", API_VERSION,
+                                     "b2_list_unfinished_large_files"]))
+        or (util.http.Method.POST != method)):
+        msg = "Bad request to mock " + inspect.currentframe().f_code.co_name \
+              + " Url=" + str(url) \
+              + ", Method=" + method.name \
+              + ", Headers=" + str(headers) \
+              + ", Body=" + str(body)
+        raise BadMockRequestError(msg)
+
+    try:
+        req_body_json = json.loads(body)
+
+        next_file = None
+        if "startFileId" in req_body_json:
+            next_file = req_body_json["startFileId"]
+
+        resp_body = dict()
+        if None == next_file:
+            resp_body["files"]  = [{"fileId" : "someFileId",
+                                    "fileName" : "someFileName"},
+                                   {"fileId" : "someOtherFileId",
+                                    "fileName" : "someOtherFileName"}]
+            resp_body["nextFileId"] = "finalFileId"
+        else:
+            resp_body["files"] = [{"fileId" : next_file,
+                                   "fileName" : "finalFileName"}]
+            resp_body["nextFileId"] = None
+
+        return util.http.Response(url, headers, body, http.HTTPStatus.OK, {},
+                                  json.dumps(resp_body))
+    except (Bbb2Error, KeyError) as e:
+        msg = "Bad request to mock " + inspect.currentframe().f_code.co_name \
               + " Url=" + str(url) \
               + ", Method=" + method.name \
               + ", Headers=" + str(headers) \
