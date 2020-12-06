@@ -7,6 +7,11 @@ import Bbb2Error
 import log
 import util
 
+class UploadFileLimits:
+    TERABYTE = 1024 * 1024 * 1024 * 1024
+    MAX_FILE_BYTES = 10 * TERABYTE
+    MAX_UPLOAD_PARTS = 10000
+
 class UnfinishedUpload:
     file_id = None
     file_name = None
@@ -42,32 +47,33 @@ def get_bucket_id_from_name(creds, bucket_name):
     else:
         return None
 
-def get_cred_from_default_file():
-    cred_file_path = pathlib.Path.home() / ".bbb2_cred.json"
+class AppKey:
+    def __init__(self, key_id, app_key):
+        self.key_id = key_id
+        self.app_key = app_key
 
-    cred_file = None
+def get_key_from_file(key_file_path = pathlib.Path.home() / ".bbb2.json"):
+    key_file = None
     try:
-        cred_file = open(file=str(cred_file_path), mode='r',
-                         encoding='utf-8')
+        key_file = open(file=str(key_file_path), mode='r', encoding='utf-8')
+        key_file_contents = json.load(key_file)
+        return AppKey(key_file_contents["keyId"],
+                      key_file_contents["applicationKey"])
     except OSError as e:
-        msg = ("Failed to open credential file."
-               + " CredFilePath=\"" + str(cred_file_path) + "\".")
-        raise Bbb2Error.Bbb2Error(msg) from e
-
-    try:
-        cred_file_contents = json.load(cred_file)
-        return (cred_file_contents["keyId"],
-                cred_file_contents["applicationKey"])
+        msg = "Failed to open key file." \
+              + " KeyFilePath=\"" + str(key_file_path) + "\"."
+        raise Bbb2Error.InternalError(msg) from e
     except json.JSONDecodeError as e:
-        msg = ("Failed to parse credential file."
-               + " CredFilePath=\"" + str(cred_file_path) + "\".")
-        raise Bbb2Error.Bbb2Error(msg)
+        msg = "Failed to parse key file." \
+              + " KeyFilePath=\"" + str(key_file_path) + "\"."
+        raise Bbb2Error.InternalError(msg) from e
     except KeyError as e:
-        msg = ("Failed to find key in credential file."
-               + " CredFilePath=\"" + str(cred_file_path) + "\".")
-        raise Bbb2Error.Bbb2Error(msg) from e
+        msg = "Failed to find fields in key file." \
+              + " KeyFilePath=\"" + str(key_file_path) + "\"."
+        raise Bbb2Error.InternalError(msg) from e
     finally:
-        cred_file.close()
+        if None != key_file:
+            key_file.close()
 
 def get_file_info(creds, bucket_name, file_name):
     bucket_id = get_bucket_id_from_name(creds, bucket_name)
