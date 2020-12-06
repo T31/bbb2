@@ -6,7 +6,6 @@ annoying to use without the convenience methods in api/api.py
 import base64
 import copy
 import hashlib
-import http
 import json
 
 from api.results import AuthorizeResult
@@ -22,8 +21,6 @@ from api.results import ListUnfinishedLargeFilesResult
 from api.results import StartLargeFileResult
 from api.results import UploadFileResult
 from api.results import UploadPartResult
-import api.util
-import Bbb2Error
 import util.http
 import util.util
 

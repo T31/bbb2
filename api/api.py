@@ -1,17 +1,6 @@
-import base64
-import copy
-import hashlib
-import http
-import json
-
 from api.raw import RawApi
 from api.results import ListPartsResult
 from api.results import ListUnfinishedLargeFilesResult
-import api.util
-import Bbb2Error
-import log
-import util.http
-import util.util
 
 class Api(RawApi):
     @staticmethod
