@@ -5,19 +5,16 @@ import random
 
 from api.api import Api
 import Bbb2Error
-import client.util
+import client.internal
 import util.http
 import util.util
 
-class Client():
-    def __init__(self):
-        self.credentials = None
-
+class Client(client.internal.Internal):
     def authorize(self, key_id = None, application_key = None):
         local_key_id = copy.deepcopy(key_id)
         local_application_key = copy.deepcopy(application_key)
         if (None == key_id) or (None == application_key):
-            key = client.util.get_key_from_file()
+            key = self.get_key_from_file()
             local_key_id = key.key_id
             local_application_key = key.app_key
 

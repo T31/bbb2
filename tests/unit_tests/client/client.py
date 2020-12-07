@@ -4,15 +4,23 @@ import traceback
 
 from client.client import Client
 import tests.mocks.util.http
-import tests.mocks.client.util
+import tests.mocks.client.internal
 
 @patch('util.http.send_request', tests.mocks.util.http.send_request)
 class ClientTests(unittest.TestCase):
-    @patch('client.util.get_key_from_file',
-           tests.mocks.client.util.get_key_from_file)
+    @patch('client.internal.Internal.get_key_from_file',
+           tests.mocks.client.internal.Internal.get_key_from_file)
     def test_authorize(self):
         try:
             Client().authorize()
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
+
+    @unittest.SkipTest
+    def test_cancel_large_file(self):
+        try:
+            Client().cancel_large_file("someFileId")
         except:
             traceback.print_exc()
             self.assertTrue(False)
