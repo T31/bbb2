@@ -1,8 +1,9 @@
+import copy
 import json
 import os
 import pathlib
 
-import api.api
+from api.api import Api
 import Bbb2Error
 import log
 import util
@@ -20,6 +21,22 @@ class UploadFileLimits:
 class Internal:
     def __init__(self):
         self.credentials = None
+
+    def authorize(self, key_id = None, application_key = None):
+        local_key_id = copy.deepcopy(key_id)
+        local_application_key = copy.deepcopy(application_key)
+        if (None == key_id) or (None == application_key):
+            key = self.get_key_from_file()
+            local_key_id = key.key_id
+            local_application_key = key.app_key
+
+        self.credentials = Api.authorize_account(local_key_id,
+                                                 local_application_key)
+        log.log_info("Authorized.")
+
+    def init_auth(self):
+        if None == self.credentials:
+            self.authorize()
 
     def check_for_upload_parts(creds, bucket_name, file_name):
         bucket_id = get_bucket_id_from_name(creds, bucket_name)
