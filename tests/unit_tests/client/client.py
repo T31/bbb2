@@ -31,6 +31,10 @@ class ClientTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
+    def test_download_file(self):
+        pass
+
     def test_list_buckets(self):
         try:
             Client().list_buckets()
@@ -38,3 +42,7 @@ class ClientTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    @unittest.SkipTest
+    def test_upload_file(self):
+        pass
