@@ -21,22 +21,21 @@ class UploadFileLimits:
 class Internal:
     def __init__(self):
         self.credentials = None
+        self.app_key = None
 
-    def authorize(self, key_id = None, application_key = None):
-        local_key_id = copy.deepcopy(key_id)
-        local_application_key = copy.deepcopy(application_key)
-        if (None == key_id) or (None == application_key):
-            key = self.get_key_from_file()
-            local_key_id = key.key_id
-            local_application_key = key.app_key
+    def authorize(self, app_key = None):
+        if None == app_key:
+            self.app_key = self.get_key_from_file()
+        else:
+            self.app_key = copy.deepcopy(app_key)
 
-        self.credentials = Api.authorize_account(local_key_id,
-                                                 local_application_key)
+        self.credentials = Api.authorize_account(self.app_key.key_id,
+                                                 self.app_key.app_key)
         log.log_info("Authorized.")
 
     def init_auth(self):
         if None == self.credentials:
-            self.authorize()
+            self.authorize(self.app_key)
 
     def check_for_upload_parts(creds, bucket_name, file_name):
         bucket_id = get_bucket_id_from_name(creds, bucket_name)

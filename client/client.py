@@ -10,8 +10,8 @@ import util.http
 import util.util
 
 class Client(client.internal.Internal):
-    def authorize(self, key_id = None, application_key = None):
-        return super().authorize(key_id, application_key)
+    def authorize(self, app_key = None):
+        return super().authorize(app_key)
 
     def cancel_all_large_files(self):
         for bucket_name in self.list_buckets():
@@ -19,13 +19,13 @@ class Client(client.internal.Internal):
                                                             bucket_name)
 
             unfinished_files = \
-            api.api.Api.list_unfinished_large_files(self.credentials,
-                                                       bucket_id)
+            Api.list_unfinished_large_files(self.credentials, bucket_id)
 
             for file in unfinished_files.unfinished_files:
                 self.cancel_large_file(file.file_id)
 
     def cancel_large_file(self, file_id):
+        self.init_auth()
         Api.cancel_large_file(self.credentials, file_id)
         log.log_info("Cancelled large file ID \"" + str(file_id) + "\"")
 
@@ -57,10 +57,9 @@ class Client(client.internal.Internal):
                 if end_idx_inc > src_file_len:
                     end_idx_inc = src_file_len - 1
 
-                result = api.api.Api.download_file_by_id(self.credentials,
-                                                            src_file_id,
-                                                            start_idx_inc,
-                                                            end_idx_inc)
+                result = Api.download_file_by_id(self.credentials, src_file_id,
+                                                 start_idx_inc, end_idx_inc)
+
                 out_file.write(result.payload)
                 bytes_downloaded += len(result.payload)
 
@@ -72,7 +71,7 @@ class Client(client.internal.Internal):
                 out_file.close()
 
     def list_buckets(self, bucket_name=None):
-        return api.api.Api.list_buckets(self.credentials, bucket_name)
+        return Api.list_buckets(self.credentials, bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
         file_len = util.util.get_file_len_bytes(src_file_path)
