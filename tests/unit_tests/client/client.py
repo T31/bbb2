@@ -23,3 +23,11 @@ class ClientTests(unittest.TestCase):
         except:
             traceback.print_exc()
             self.assertTrue(False)
+
+    def test_list_buckets(self):
+        try:
+            Client().list_buckets()
+            Client().list_buckets("someBucketName")
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)

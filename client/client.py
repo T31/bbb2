@@ -1,4 +1,3 @@
-import copy
 import log
 import os
 import random
@@ -6,7 +5,6 @@ import random
 from api.api import Api
 import Bbb2Error
 import client.internal
-import util.http
 import util.util
 
 class Client(client.internal.Internal):
@@ -70,7 +68,8 @@ class Client(client.internal.Internal):
             if None != out_file:
                 out_file.close()
 
-    def list_buckets(self, bucket_name=None):
+    def list_buckets(self, bucket_name = None):
+        self.init_auth()
         return Api.list_buckets(self.credentials, bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
