@@ -3,6 +3,7 @@ import json
 
 from Bbb2Error import ApiParseError
 from Bbb2Error import BadRequestError
+from Bbb2Error import InternalError
 from Bbb2Error import UnauthorizedError
 from util.http import Url
 
@@ -23,11 +24,11 @@ class AuthorizeAccountResult:
             try:
                 self.account_id = json_body["accountId"]
                 self.auth_token = json_body["authorizationToken"]
-                self.api_url = json_body["apiUrl"]
-                self.download_url = json_body["downloadUrl"]
+                self.api_url = Url.from_string(json_body["apiUrl"])
+                self.download_url = Url.from_string(json_body["downloadUrl"])
                 self.min_part_size_bytes = json_body["absoluteMinimumPartSize"]
                 self.rec_part_size_bytes = json_body["recommendedPartSize"]
-            except (json.JSONDecodeError, KeyError) as e:
+            except (InternalError, json.JSONDecodeError, KeyError) as e:
                 raise Bbb2Error.ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)

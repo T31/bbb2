@@ -19,8 +19,8 @@ def send_request(url, method, headers, body):
         resp_body = dict()
         resp_body["accountId"] = "someAccountId"
         resp_body["authorizationToken"] = "someAuthToken"
-        resp_body["apiUrl"] = "someApiUrl"
-        resp_body["downloadUrl"] = "someDownloadUrl"
+        resp_body["apiUrl"] = "https://api000.backblazeb2.com"
+        resp_body["downloadUrl"] = "https://f000.backblazeb2.com"
         resp_body["absoluteMinimumPartSize"] = "someMinPartSize"
         resp_body["recommendedPartSize"] = "someRecPartSize"
 
