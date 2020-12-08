@@ -12,15 +12,13 @@ class Client(client.internal.Internal):
         return super().authorize(app_key)
 
     def cancel_all_large_files(self):
-        for bucket_name in self.list_buckets():
-            bucket_id = client.util.get_bucket_id_from_name(self.credentials,
-                                                            bucket_name)
+        for bucket_id in self.list_buckets().buckets:
 
             unfinished_files = \
             Api.list_unfinished_large_files(self.credentials, bucket_id)
 
-            for file in unfinished_files.unfinished_files:
-                self.cancel_large_file(file.file_id)
+            for unfinished_file in unfinished_files.unfinished_files:
+                self.cancel_large_file(unfinished_file.file_id)
 
     def cancel_large_file(self, file_id):
         self.init_auth()

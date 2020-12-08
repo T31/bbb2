@@ -17,6 +17,13 @@ class ClientTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    def test_cancel_all_large_files(self):
+        try:
+            Client().cancel_all_large_files()
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
+
     def test_cancel_large_file(self):
         try:
             Client().cancel_large_file("someFileId")
