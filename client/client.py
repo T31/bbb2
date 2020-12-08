@@ -12,6 +12,7 @@ class Client(client.internal.Internal):
         return super().authorize(app_key)
 
     def cancel_all_large_files(self):
+        self.init_auth()
         for bucket_id in self.list_buckets().buckets:
 
             unfinished_files = \
@@ -26,15 +27,21 @@ class Client(client.internal.Internal):
         log.log_info("Cancelled large file ID \"" + str(file_id) + "\"")
 
     def download_file(self, src_bucket_name, src_file_path, dst_file_path):
+        self.init_auth()
         log.log_info("Downloading file \"" + src_file_path + "\""
                      + " from bucket \"" + src_bucket_name + "\""
                      + " to path \"" + dst_file_path + "\".")
 
-        src_file_info = client.util.get_file_info(self.credentials,
-                                                  src_bucket_name,
-                                                  src_file_path)
-        src_file_id = src_file_info["fileId"]
-        src_file_len = src_file_info["contentLength"]
+        src_file_info = self.get_file_info(src_bucket_name, src_file_path)
+        if None == src_file_info:
+            msg = "Unable to find file \"" + str(src_file_path) + "\"" \
+                  + " in bucket \"" + str(src_bucket_name) + "\"." \
+                  + " Unable to download file."
+            log.log_warning(msg)
+            return False
+
+        src_file_id = src_file_info.file_id
+        src_file_len = src_file_info.content_length
         bytes_downloaded = 0
         chunk_len = 10 * 1024 * 1024
 
@@ -66,11 +73,14 @@ class Client(client.internal.Internal):
             if None != out_file:
                 out_file.close()
 
+        return True
+
     def list_buckets(self, bucket_name = None):
         self.init_auth()
         return Api.list_buckets(self.credentials, bucket_name)
 
     def upload_file(self, bucket_name, dst_file_name, src_file_path):
+        self.init_auth()
         file_len = util.util.get_file_len_bytes(src_file_path)
 
         log.log_info("Uploading file \"" + str(src_file_path) + "\"."

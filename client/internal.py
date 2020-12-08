@@ -4,6 +4,7 @@ import os
 import pathlib
 
 from api.api import Api
+from api.results import FileNameEntry
 import Bbb2Error
 import log
 import util
@@ -54,10 +55,11 @@ class Internal:
         upload_parts = util.api.list_all_parts(creds, file_id).upload_parts
         return UnfinishedUpload(file_id, file_name, upload_parts)
 
-    def get_bucket_id_from_name(creds, bucket_name):
-        buckets = api.api.Api.list_buckets(creds, bucket_name)
-        if bucket_name in buckets:
-            return buckets[bucket_name]
+    def get_bucket_id_from_name(self, bucket_name):
+        result = Api.list_buckets(self.credentials, bucket_name)
+        for bucket_id in result.buckets:
+            if result.buckets[bucket_id] == bucket_name:
+                return bucket_id
 
         return None
 
@@ -87,13 +89,17 @@ class Internal:
             if None != key_file:
                 key_file.close()
 
-    def get_file_info(creds, bucket_name, file_name):
-        bucket_id = get_bucket_id_from_name(creds, bucket_name)
-        bucket_files = api.api.Api.list_file_names(creds, bucket_id)
-        if file_name in bucket_files:
-            return bucket_files[file_name]
-        else:
+    def get_file_info(self, bucket_name, file_name):
+        bucket_id = self.get_bucket_id_from_name(bucket_name)
+        if None == bucket_id:
             return None
+
+        result = Api.list_file_names(self.credentials, bucket_id)
+        for entry in result.file_names:
+            if entry.file_name == file_name:
+                return entry
+
+        return None
 
     class SkipAlreadyUploadedResults:
         cur_part_num = 1

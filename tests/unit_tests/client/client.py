@@ -1,10 +1,11 @@
 import unittest
 from unittest.mock import patch
+import tempfile
 import traceback
 
 from client.client import Client
-import tests.mocks.util.http
 import tests.mocks.client.internal
+import tests.mocks.util.http
 
 @patch('util.http.send_request', tests.mocks.util.http.send_request)
 @patch('client.internal.Internal.get_key_from_file',
@@ -31,9 +32,19 @@ class ClientTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
-    @unittest.SkipTest
     def test_download_file(self):
-        pass
+        temp_file = None
+        try:
+            temp_file = tempfile.NamedTemporaryFile()
+            self.assertTrue(Client().download_file("someBucketName",
+                                                   "someFileName",
+                                                   temp_file.name))
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
+        finally:
+            if None != temp_file:
+                temp_file.close()
 
     def test_list_buckets(self):
         try:
