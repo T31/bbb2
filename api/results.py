@@ -32,7 +32,6 @@ class AuthorizeAccountResult:
                 raise Bbb2Error.ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class CancelLargeFileResult:
     def __init__(self, http_response):
@@ -46,7 +45,6 @@ class CancelLargeFileResult:
                 raise ApiParseError(str(http_response))
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class DownloadFileByIdResult:
     def __init__(self, http_response):
@@ -61,7 +59,6 @@ class DownloadFileByIdResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropraite_error(http_response)
-            assert False
 
 class FinishLargeFileResult:
     def __init__(self, http_response):
@@ -75,7 +72,6 @@ class FinishLargeFileResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class GetUploadPartUrlResult:
     def __init__(self, http_response):
@@ -89,7 +85,6 @@ class GetUploadPartUrlResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class GetUploadUrlResult:
     def __init__(self, http_response):
@@ -103,7 +98,6 @@ class GetUploadUrlResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class ListBucketsResult:
     def __init__(self, http_response):
@@ -118,7 +112,6 @@ class ListBucketsResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class FileNameEntry:
     def __init__(self, file_name, file_id, content_length):
@@ -142,7 +135,6 @@ class ListFileNamesResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class UploadPart:
     def __init__(self, part_num, content_len, sha1):
@@ -171,7 +163,6 @@ class ListPartsResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class UnfinishedLargeFile:
     def __init__(self, file_id, file_name):
@@ -198,7 +189,6 @@ class ListUnfinishedLargeFilesResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class StartLargeFileResult:
     def __init__(self, http_response):
@@ -210,7 +200,6 @@ class StartLargeFileResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class UploadFileResult:
     def __init__(self, http_response):
@@ -225,7 +214,6 @@ class UploadFileResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
 
 class UploadPartResult:
     def __init__(self, http_response):
@@ -238,4 +226,3 @@ class UploadPartResult:
                 raise ApiParseError(str(http_response)) from e
         else:
             api.util.raise_appropriate_error(http_response)
-            assert False
