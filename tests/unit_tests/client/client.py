@@ -56,4 +56,9 @@ class ClientTests(unittest.TestCase):
 
     @unittest.SkipTest
     def test_upload_file(self):
-        pass
+        try:
+            Client().upload_file("someBucketName", "someDstFilePath",
+                                 src_file_path)
+        except:
+            traceback.print_exc()
+            self.assertTrue(False)
