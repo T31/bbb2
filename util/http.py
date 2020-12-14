@@ -12,8 +12,6 @@ class Method(enum.Enum):
     POST = 1
 
 class Domain:
-    domain = []
-
     def __init__(self, domain = []):
         self.domain = domain
 
@@ -40,8 +38,6 @@ class Domain:
         return retVal
 
 class Path:
-    path = []
-
     def __init__(self, path = []):
         self.path = path
 
@@ -74,10 +70,6 @@ class Path:
         return len(self.path) != 0
 
 class Url:
-    protocol = Protocol.HTTPS
-    domain = Domain()
-    path = Path()
-
     def __init__(self, protocol, domain, path):
         self.protocol = protocol
         self.domain = domain
@@ -149,13 +141,6 @@ class Url:
         return str(self.domain) + str(self.path)
 
 class Response:
-    req_url = None
-    req_headers = None
-    req_body = None
-    status_code = None
-    resp_headers = None
-    resp_body = None
-
     def __init__(self, req_url, req_headers, req_body, status_code,
                  resp_headers, resp_body):
         self.req_url = req_url
@@ -181,9 +166,6 @@ class Response:
         return msg
 
 class CachedConnection:
-    url = None
-    connection = None
-
     def __init__(self, url, connection):
         self.url = url
         self.connection = connection
