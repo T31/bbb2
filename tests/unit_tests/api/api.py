@@ -30,6 +30,7 @@ class ApiApiInheritedTests(unittest.TestCase):
 
         self.upload_url = util.http.Url.from_string("https://up.backblaze.com")
 
+    @unittest.SkipTest
     def test_authorize_account(self):
         try:
             Api.authorize_account("someKeyId", "someAppKey")
@@ -37,6 +38,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_cancel_large_file(self):
         try:
             Api.cancel_large_file(self.creds, "someFileId")
@@ -44,6 +46,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_download_file_by_id(self):
         try:
             Api.download_file_by_id(self.creds, "someFileId", 0, 3)
@@ -51,6 +54,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
     
+    @unittest.SkipTest
     def test_finish_large_file(self):
         try:
             Api.finish_large_file(self.creds, "someFileId",
@@ -59,6 +63,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_get_upload_part_url(self):
         try:
             Api.get_upload_part_url(self.creds, "someFileId")
@@ -66,6 +71,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_get_upload_url(self):
         try:
             Api.get_upload_url(self.creds, "someBucketId")
@@ -73,6 +79,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_list_buckets(self):
         try:
             Api.list_buckets(self.creds, "someBucketName")
@@ -81,6 +88,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_list_file_names(self):
         try:
             Api.list_file_names(self.creds, "someBucketId")
@@ -88,6 +96,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_list_parts(self):
         try:
             Api.list_parts(self.creds, "someFileId")
@@ -96,6 +105,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_list_unfinished_large_files(self):
         try:
             Api.list_unfinished_large_files(self.creds, "someBucketId")
@@ -105,6 +115,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_start_large_file(self):
         try:
             Api.start_large_file(self.creds, "someBucketId", "someFileName")
@@ -112,6 +123,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_upload_file(self):
         try:
             Api.upload_file(self.upload_url, "someUploadAuthToken",
@@ -120,6 +132,7 @@ class ApiApiInheritedTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     def test_upload_part(self):
         try:
             Api.upload_part(self.upload_url, "someAuthToken", 20,
@@ -146,6 +159,7 @@ class ApiApiTests(unittest.TestCase):
 
         self.creds.MAX_UPLOAD_PARTS = 10000
 
+    @unittest.SkipTest
     @patch('util.http.send_request',
            tests.mocks.util.http.send_request_list_all_upload_parts)
     def test_list_all_parts(self):
@@ -155,6 +169,7 @@ class ApiApiTests(unittest.TestCase):
             traceback.print_exc()
             self.assertTrue(False)
 
+    @unittest.SkipTest
     @patch('util.http.send_request',
            tests.mocks.util.http.send_request_list_all_unfinished_large_files)
     def test_list_all_unfinished_large_files(self):
