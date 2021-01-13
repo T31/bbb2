@@ -5,4 +5,4 @@ all:
 	javac -d tst/bin -classpath extern/junit-platform-console-standalone-1.7.0.jar tst/Tests.java
 
 test: all
-	java -jar extern/junit-platform-console-standalone-1.7.0.jar --classpath tst/bin --scan-class-path
+	java -jar extern/junit-platform-console-standalone-1.7.0.jar --classpath tst/bin --scan-class-path --disable-ansi-colors
