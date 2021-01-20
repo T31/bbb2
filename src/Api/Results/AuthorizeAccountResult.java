@@ -1,4 +1,4 @@
-package Bbb2.Api;
+package Bbb2.Api.Results;
 
 import java.net.URI;
 
