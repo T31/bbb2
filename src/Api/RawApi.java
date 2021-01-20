@@ -9,6 +9,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.io.IOException;
 
+import com.google.gson.Gson;
+
 public class RawApi
 {
     public static void authorizeAccount(String keyId, String appKey)
