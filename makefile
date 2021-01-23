@@ -1,17 +1,23 @@
 .PHONY: all test clean
 
-SRC = src/Bbb2.java\
-      src/Api/RawApi.java\
-      src/Api/Results/AuthorizeAccountResult.java
+SRC = src/bbb2/Bbb2.java\
+      src/bbb2/api/Api.java\
+      src/bbb2/api/ApiProxy.java\
+      src/bbb2/api/results/AuthorizeAccountResult.java\
+      src/bbb2/util/JsonProxy.java
 
 TST = tst/Tests.java
 
+JSON_JAR = extern/javax.json/javax.json.jar
+
+JUNIT_JAR = extern/junit-platform-console-standalone-1.7.0.jar
+
 all:
-	javac -d bin -classpath extern/javax.json/javax.json.jar $(SRC)
-	javac -d tst/bin -classpath extern/junit-platform-console-standalone-1.7.0.jar $(TST)
+	javac -d bin -classpath $(JSON_JAR) $(SRC)
+	javac -d tst/bin -classpath $(JUNIT_JAR):$(JSON_JAR) $(SRC) $(TST)
 
 test: all
-	java -jar extern/junit-platform-console-standalone-1.7.0.jar --classpath tst/bin --scan-class-path --disable-ansi-colors
+	java -jar $(JUNIT_JAR) --classpath tst/bin:bin:$(JSON_JAR) --scan-class-path --disable-ansi-colors
 
 clean:
 	rm -rf bin/*

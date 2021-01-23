@@ -1,4 +1,4 @@
-package Bbb2;
+package bbb2;
 
 import java.io.StringReader;
 import java.net.URI;
@@ -7,9 +7,6 @@ import java.net.URISyntaxException;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReaderFactory;
-
-import Bbb2.Api.RawApi;
-import Bbb2.Api.Results.AuthorizeAccountResult;
 
 public class Bbb2
 {

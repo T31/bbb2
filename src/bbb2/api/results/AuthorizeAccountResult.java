@@ -1,11 +1,13 @@
-package Bbb2.Api.Results;
+package bbb2.api.results;
+
 import java.net.URI;
+
+import javax.json.JsonObject;
+
+import bbb2.util.JsonProxy;
 
 public class AuthorizeAccountResult
 {
-    public AuthorizeAccountResult()
-    {}
-
     public AuthorizeAccountResult(String inAccountId, String inAuthToken,
                                   URI inApiUrl, URI inDownloadUrl,
                                   int inMinPartSizeBytes,
@@ -21,26 +23,21 @@ public class AuthorizeAccountResult
 
     public AuthorizeAccountResult(String jsonString)
     {
-        /*
         try
         {
-            JsonObject json = new Gson().fromJson(jsonString, JsonObject.class);
-            if (!json.get("accountId"))
-            {
-                // throw
-            }
-            accountId = json.get("accountId").getAsString();
-
-            if (!json.get
-
-            System.out.println(json.get("accountId").getAsString());
-            System.out.println(json.get("fat").getAsString());
+            JsonObject json = JsonProxy.parse(jsonString);
+            accountId = json.getString("accountId");
+            authToken = json.getString("authorizationToken");
+            apiUrl = new URI(json.getString("apiUrl"));
+            downloadUrl = new URI(json.getString("downloadUrl"));
+            minPartSizeBytes = json.getInt("absoluteMinimumPartSize");
+            recPartSizeBytes = json.getInt("recommendedPartSize");
         }
-        catch (NullPointerException e)
+        catch (Exception e)
         {
-            System.err.println("Unable to find element");
+            System.err.println(e.toString());
+            throw e;
         }
-        */
     }
 
     public String accountId;
