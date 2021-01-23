@@ -7,7 +7,7 @@ SRC = src/bbb2/Bbb2.java\
       src/bbb2/util/json/JsonObjectProxy.java\
       src/bbb2/util/json/JsonParseException.java
 
-TST = tst/Tests.java
+TST = tst/ApiResultsTests.java
 
 JSON_JAR = extern/javax.json/javax.json.jar
 

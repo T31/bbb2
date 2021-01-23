@@ -6,23 +6,6 @@ import bbb2.util.json.JsonObjectProxy;
 
 public class AuthorizeAccountResult
 {
-    public static class Internals
-    {
-    }
-
-    public AuthorizeAccountResult(String inAccountId, String inAuthToken,
-                                  URI inApiUrl, URI inDownloadUrl,
-                                  int inMinPartSizeBytes,
-                                  int inRecPartSizeBytes)
-    {
-        accountId = inAccountId;
-        authToken = inAuthToken;
-        apiUrl = inApiUrl;
-        downloadUrl = inDownloadUrl;
-        minPartSizeBytes = inMinPartSizeBytes;
-        recPartSizeBytes = inRecPartSizeBytes;
-    }
-
     public AuthorizeAccountResult(String jsonString)
     {
         try
