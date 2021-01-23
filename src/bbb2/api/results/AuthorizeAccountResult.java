@@ -2,12 +2,14 @@ package bbb2.api.results;
 
 import java.net.URI;
 
-import javax.json.JsonObject;
-
-import bbb2.util.JsonProxy;
+import bbb2.util.json.JsonObjectProxy;
 
 public class AuthorizeAccountResult
 {
+    public static class Internals
+    {
+    }
+
     public AuthorizeAccountResult(String inAccountId, String inAuthToken,
                                   URI inApiUrl, URI inDownloadUrl,
                                   int inMinPartSizeBytes,
@@ -25,7 +27,7 @@ public class AuthorizeAccountResult
     {
         try
         {
-            JsonObject json = JsonProxy.parse(jsonString);
+            JsonObjectProxy json = new JsonObjectProxy(jsonString);
             accountId = json.getString("accountId");
             authToken = json.getString("authorizationToken");
             apiUrl = new URI(json.getString("apiUrl"));
@@ -36,7 +38,6 @@ public class AuthorizeAccountResult
         catch (Exception e)
         {
             System.err.println(e.toString());
-            throw e;
         }
     }
 

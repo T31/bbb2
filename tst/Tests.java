@@ -34,6 +34,7 @@ class Tests
         "}";
 
         AuthorizeAccountResult result = new AuthorizeAccountResult(test);
+        AuthorizeAccountResult.Internals i = new AuthorizeAccountResult.Internals();
         System.out.println(result.apiUrl);
         System.out.println(result.accountId);
         Assertions.assertEquals(true, true);
