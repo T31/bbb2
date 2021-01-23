@@ -6,6 +6,8 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReaderFactory;
 
+import bbb2.util.json.JsonParseException;
+
 public class JsonObjectProxy
 {
     public JsonObjectProxy(String s)
@@ -18,18 +20,21 @@ public class JsonObjectProxy
         internalObj = inObj;
     }
 
-    public JsonObjectProxy getObject(String key) throws Exception
+    public JsonObjectProxy getObject(String key) throws JsonParseException
     {
         JsonObject innerObj = internalObj.getJsonObject(key);
         if (null == innerObj)
         {
-            throw new Exception();
+            StringBuilder s = new StringBuilder();
+            s.append("Unable to find key \"" + key + "\"");
+            s.append(" in response \"" + toString() + "\".");
+            throw new JsonParseException(s.toString());
         }
 
         return new JsonObjectProxy(innerObj);
     }
 
-    public String getString(String key)
+    public String getString(String key) throws JsonParseException
     {
         try
         {
@@ -37,15 +42,21 @@ public class JsonObjectProxy
         }
         catch (NullPointerException e)
         {
-            return "";
+            StringBuilder s = new StringBuilder();
+            s.append("Unable to find key \"" + key + "\"");
+            s.append(" in response \"" + toString() + "\".");
+            throw new JsonParseException(s.toString(), e);
         }
         catch (ClassCastException e)
         {
-            return "";
+            StringBuilder s = new StringBuilder();
+            s.append("Value type for key \"" + key + "\" was not string.");
+            s.append(" Response=\"" + toString() + "\".");
+            throw new JsonParseException(s.toString(), e);
         }
     }
 
-    public int getInt(String key)
+    public int getInt(String key) throws JsonParseException
     {
         try
         {
@@ -53,12 +64,23 @@ public class JsonObjectProxy
         }
         catch (NullPointerException e)
         {
-            return 0;
+            StringBuilder s = new StringBuilder();
+            s.append("Unable to find key \"" + key + "\"");
+            s.append(" in response \"" + toString() + "\".");
+            throw new JsonParseException(s.toString(), e);
         }
         catch (ClassCastException e)
         {
-            return 0;
+            StringBuilder s = new StringBuilder();
+            s.append("Value type for key \"" + key + "\" was not int.");
+            s.append(" Response=\"" + toString() + "\".");
+            throw new JsonParseException(s.toString(), e);
         }
+    }
+
+    public String toString()
+    {
+        return internalObj.toString();
     }
 
     private JsonObject internalObj;

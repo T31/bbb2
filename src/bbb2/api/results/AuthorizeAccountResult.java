@@ -37,7 +37,7 @@ public class AuthorizeAccountResult
         }
         catch (Exception e)
         {
-            System.err.println(e.toString());
+            e.printStackTrace();
         }
     }
 
