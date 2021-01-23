@@ -1,13 +1,11 @@
 package Bbb2.Api.Results;
-
 import java.net.URI;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 public class AuthorizeAccountResult
 {
+    public AuthorizeAccountResult()
+    {}
+
     public AuthorizeAccountResult(String inAccountId, String inAuthToken,
                                   URI inApiUrl, URI inDownloadUrl,
                                   int inMinPartSizeBytes,
@@ -21,11 +19,28 @@ public class AuthorizeAccountResult
         recPartSizeBytes = inRecPartSizeBytes;
     }
 
-    public AuthorizeAccountResult(String json)
+    public AuthorizeAccountResult(String jsonString)
     {
-        Gson gson = new Gson();
-        JsonObject e = gson.fromJson(json, JsonObject.class);
-        System.out.println(e.get("accountId").getAsString());
+        /*
+        try
+        {
+            JsonObject json = new Gson().fromJson(jsonString, JsonObject.class);
+            if (!json.get("accountId"))
+            {
+                // throw
+            }
+            accountId = json.get("accountId").getAsString();
+
+            if (!json.get
+
+            System.out.println(json.get("accountId").getAsString());
+            System.out.println(json.get("fat").getAsString());
+        }
+        catch (NullPointerException e)
+        {
+            System.err.println("Unable to find element");
+        }
+        */
     }
 
     public String accountId;

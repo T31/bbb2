@@ -2,12 +2,12 @@
 
 SRC = src/Bbb2.java\
       src/Api/RawApi.java\
-      src/Api/AuthorizeAccountResult.java
+      src/Api/Results/AuthorizeAccountResult.java
 
 TST = tst/Tests.java
 
 all:
-	javac -d bin -classpath extern/gson-2.8.6.jar $(SRC)
+	javac -d bin -classpath extern/javax.json/javax.json.jar $(SRC)
 	javac -d tst/bin -classpath extern/junit-platform-console-standalone-1.7.0.jar $(TST)
 
 test: all
