@@ -21,7 +21,7 @@ public class StandardLibTests
         catch (MalformedURLException e)
         {
             e.printStackTrace();
-            Assertions.assertEquals(false, true);
+            Assertions.fail();
         }
     }
 }

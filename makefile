@@ -2,6 +2,7 @@
 
 SRC = src/bbb2/Bbb2.java\
       src/bbb2/api/Api.java\
+      src/bbb2/api/ApiParseException.java\
       src/bbb2/api/ApiProxy.java\
       src/bbb2/api/results/AuthorizeAccountResult.java\
       src/bbb2/util/json/JsonObjectProxy.java\

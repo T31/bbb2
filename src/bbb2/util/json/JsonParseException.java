@@ -2,13 +2,13 @@ package bbb2.util.json;
 
 public class JsonParseException extends Exception
 {
-    public JsonParseException(String s)
+    public JsonParseException(String msg)
     {
-        super(s);
+        super(msg);
     }
 
-    public JsonParseException(String s, Throwable cause)
+    public JsonParseException(String msg, Throwable cause)
     {
-        super(s, cause);
+        super(msg, cause);
     }
 }

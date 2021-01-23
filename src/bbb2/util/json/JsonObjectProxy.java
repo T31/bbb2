@@ -20,6 +20,28 @@ public class JsonObjectProxy
         internalObj = inObj;
     }
 
+    public int getInt(String key) throws JsonParseException
+    {
+        try
+        {
+            return internalObj.getInt(key);
+        }
+        catch (NullPointerException e)
+        {
+            StringBuilder s = new StringBuilder();
+            s.append("Unable to find key \"" + key + "\"");
+            s.append(" in response \"" + toString() + "\".");
+            throw new JsonParseException(s.toString(), e);
+        }
+        catch (ClassCastException e)
+        {
+            StringBuilder s = new StringBuilder();
+            s.append("Value type for key \"" + key + "\" was not int.");
+            s.append(" Response=\"" + toString() + "\".");
+            throw new JsonParseException(s.toString(), e);
+        }
+    }
+
     public JsonObjectProxy getObject(String key) throws JsonParseException
     {
         JsonObject innerObj = internalObj.getJsonObject(key);
@@ -51,28 +73,6 @@ public class JsonObjectProxy
         {
             StringBuilder s = new StringBuilder();
             s.append("Value type for key \"" + key + "\" was not string.");
-            s.append(" Response=\"" + toString() + "\".");
-            throw new JsonParseException(s.toString(), e);
-        }
-    }
-
-    public int getInt(String key) throws JsonParseException
-    {
-        try
-        {
-            return internalObj.getInt(key);
-        }
-        catch (NullPointerException e)
-        {
-            StringBuilder s = new StringBuilder();
-            s.append("Unable to find key \"" + key + "\"");
-            s.append(" in response \"" + toString() + "\".");
-            throw new JsonParseException(s.toString(), e);
-        }
-        catch (ClassCastException e)
-        {
-            StringBuilder s = new StringBuilder();
-            s.append("Value type for key \"" + key + "\" was not int.");
             s.append(" Response=\"" + toString() + "\".");
             throw new JsonParseException(s.toString(), e);
         }
