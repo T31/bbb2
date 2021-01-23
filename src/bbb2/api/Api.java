@@ -1,55 +1,105 @@
 package Bbb2.Api;
 
-import java.nio.charset.Charset;
-import java.util.Base64;
-import java.net.http.HttpRequest;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.Base64;
+
+import bbb2.api.ApiConnectException;
+import bbb2.api.ApiResponseParseException;
+import bbb2.api.results.AuthorizeAccountResult;
 
 public class Api
 {
-    public static void authorizeAccount(String keyId, String appKey)
+    public static AuthorizeAccountResult authorizeAccount(String keyId,
+                                                          String appKey)
+    throws ApiConnectException, ApiResponseParseException
     {
+        String auth = null;
         try
         {
-            String key = new String(keyId + ":" + appKey);
+            String key = keyId + ":" + appKey;
             byte[] keyBytes = key.getBytes(Charset.forName("US-ASCII"));
             String keyBase64 = Base64.getEncoder().encodeToString(keyBytes);
-            String auth = "Basic" + keyBase64;
-
-            URI auth_uri = new URI("https", "api.backblazeb2.com",
-                                   "/b2api/v2/b2_authorize_account", "");
-
-            HttpRequest req = HttpRequest.newBuilder().uri(auth_uri)
-                                                      .GET()
-                                                      .header("Authorization", auth)
-                                                      .build();
-
-            System.out.println("HERE WE GO");
-
-            HttpClient client = HttpClient.newHttpClient();
-            HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println(res.body());
+            auth = "Basic" + keyBase64;
+        }
+        catch (UnsupportedCharsetException e)
+        {
+            e.printStackTrace();
+            assert false;
+        }
+        catch (IllegalCharsetNameException e)
+        {
+            e.printStackTrace();
+            assert false;
         }
         catch (IllegalArgumentException e)
         {
-            System.err.println(e.toString());
+            // ...due to bad charset name.
+            e.printStackTrace();
+            assert false;
+        }
+
+        try
+        {
+            HttpRequest.Builder reqBuilder = HttpRequest.newBuilder();
+            HttpRequest req = reqBuilder.uri(getAuthUrl().toURI())
+                                        .GET()
+                                        .header("Authorization", auth)
+                                        .build();
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpResponse<String> res
+            = client.send(req, HttpResponse.BodyHandlers.ofString());
+
+            return new AuthorizeAccountResult(res.body());
         }
         catch (URISyntaxException e)
         {
-            System.err.println(e.toString());
+            e.printStackTrace();
+            assert false;
+            return null;
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new ApiConnectException(e);
+        }
+        catch (SecurityException e)
+        {
+            throw new ApiConnectException(e);
         }
         catch (IOException e)
         {
-            System.err.println(e.toString());
+            throw new ApiConnectException(e);
         }
         catch (InterruptedException e)
         {
-            System.err.println(e.toString());
+            throw new ApiConnectException(e);
+        }
+    }
+
+    private static URL getAuthUrl()
+    {
+        try
+        {
+            String urlString
+            = "https://api.backblazeb2.com/b2api/v2/b2_authorize_account";
+
+            return new URL(urlString);
+        }
+        catch (MalformedURLException e)
+        {
+            e.printStackTrace();
+            assert false;
+            return null;
         }
     }
 }

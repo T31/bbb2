@@ -3,13 +3,14 @@ package bbb2.api.results;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import bbb2.api.ApiParseException;
+import bbb2.api.ApiResponseParseException;
 import bbb2.util.json.JsonObjectProxy;
 import bbb2.util.json.JsonParseException;
 
 public class AuthorizeAccountResult
 {
-    public AuthorizeAccountResult(String jsonString) throws ApiParseException
+    public AuthorizeAccountResult(String jsonString)
+    throws ApiResponseParseException
     {
         try
         {
@@ -23,11 +24,13 @@ public class AuthorizeAccountResult
         }
         catch (JsonParseException e)
         {
-            throw new ApiParseException("Unable to parse API response.", e);
+            throw new ApiResponseParseException(e);
         }
         catch (MalformedURLException e)
         {
-            throw new ApiParseException("Malformed URL in API response.", e);
+            StringBuilder s = new StringBuilder();
+            s.append("ApiReponse=\"" + jsonString + "\".");
+            throw new ApiResponseParseException(s.toString(), e);
         }
     }
 

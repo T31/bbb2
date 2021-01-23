@@ -1,6 +1,6 @@
 import java.net.URL;
 
-import bbb2.api.ApiParseException;
+import bbb2.api.ApiResponseParseException;
 import bbb2.api.results.AuthorizeAccountResult;
 
 import org.junit.jupiter.api.Assertions;
@@ -47,7 +47,7 @@ class ApiResultsTests
             Assertions.assertEquals(result.minPartSizeBytes, 5000000);
             Assertions.assertEquals(result.recPartSizeBytes, 100000000);
         }
-        catch (ApiParseException e)
+        catch (ApiResponseParseException e)
         {
             e.printStackTrace();
             Assertions.fail();

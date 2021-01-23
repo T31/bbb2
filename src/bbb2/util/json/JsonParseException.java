@@ -7,6 +7,11 @@ public class JsonParseException extends Exception
         super(msg);
     }
 
+    public JsonParseException(Throwable cause)
+    {
+        super(cause);
+    }
+
     public JsonParseException(String msg, Throwable cause)
     {
         super(msg, cause);
