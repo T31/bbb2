@@ -12,11 +12,11 @@ public class StandardLibTests
         try
         {
             URL u = new URL("https://api.backblazeb2.com/path?asdf=33#ref");
-            Assertions.assertEquals(u.getProtocol(), "https");
-            Assertions.assertEquals(u.getHost(), "api.backblazeb2.com");
-            Assertions.assertEquals(u.getPath(), "/path");
-            Assertions.assertEquals(u.getQuery(), "asdf=33");
-            Assertions.assertEquals(u.getRef(), "ref");
+            Assertions.assertEquals("https", u.getProtocol());
+            Assertions.assertEquals("api.backblazeb2.com", u.getHost());
+            Assertions.assertEquals("/path", u.getPath());
+            Assertions.assertEquals("asdf=33", u.getQuery());
+            Assertions.assertEquals("ref", u.getRef());
         }
         catch (MalformedURLException e)
         {

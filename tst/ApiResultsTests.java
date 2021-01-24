@@ -37,15 +37,15 @@ class ApiResultsTests
         try
         {
             AuthorizeAccountResult result = new AuthorizeAccountResult(test);
-            Assertions.assertEquals(result.accountId, "YOUR_ACCOUNT_ID");
-            Assertions.assertEquals(result.authToken,
-                                    "4_0022623512fc8f80000000001_0186e431_d18d02_acct_tH7VW03boebOXayIc43-sxptpfA=");
-            Assertions.assertEquals(result.apiUrl.toString(),
-                                    "https://apiNNN.backblazeb2.com");
-            Assertions.assertEquals(result.downloadUrl.toString(),
-                                    "https://f002.backblazeb2.com");
-            Assertions.assertEquals(result.minPartSizeBytes, 5000000);
-            Assertions.assertEquals(result.recPartSizeBytes, 100000000);
+            Assertions.assertEquals("YOUR_ACCOUNT_ID", result.accountId);
+            Assertions.assertEquals("4_0022623512fc8f80000000001_0186e431_d18d02_acct_tH7VW03boebOXayIc43-sxptpfA=",
+                                    result.authToken);
+            Assertions.assertEquals("https://apiNNN.backblazeb2.com",
+                                    result.apiUrl.toString());
+            Assertions.assertEquals("https://f002.backblazeb2.com",
+                                    result.downloadUrl.toString());
+            Assertions.assertEquals(5000000, result.minPartSizeBytes);
+            Assertions.assertEquals(100000000, result.recPartSizeBytes);
         }
         catch (ApiResponseParseException e)
         {
