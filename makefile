@@ -12,7 +12,8 @@ SRC = src/bbb2/Bbb2.java\
       src/bbb2/util/json/JsonParseException.java
 
 TST = tst/ApiResultsTests.java\
-      tst/StandardLibTests.java
+      tst/StandardLibTests.java\
+      tst/ApiTests.java
 
 JSON_JAR = extern/javax.json/javax.json.jar
 
