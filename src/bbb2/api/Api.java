@@ -1,7 +1,6 @@
 package Bbb2.Api;
 
 import java.io.IOException;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.MalformedURLException;
@@ -15,6 +14,8 @@ import java.util.Base64;
 import bbb2.api.ApiConnectException;
 import bbb2.api.ApiResponseParseException;
 import bbb2.api.results.AuthorizeAccountResult;
+import bbb2.util.HttpException;
+import bbb2.util.HttpClientProxy;
 
 public class Api
 {
@@ -22,47 +23,32 @@ public class Api
                                                           String appKey)
     throws ApiConnectException, ApiResponseParseException
     {
-        String auth = null;
         try
         {
             String key = keyId + ":" + appKey;
             byte[] keyBytes = key.getBytes(Charset.forName("US-ASCII"));
             String keyBase64 = Base64.getEncoder().encodeToString(keyBytes);
-            auth = "Basic" + keyBase64;
-        }
-        catch (UnsupportedCharsetException e)
-        {
-            e.printStackTrace();
-            assert false;
-        }
-        catch (IllegalCharsetNameException e)
-        {
-            e.printStackTrace();
-            assert false;
-        }
-        catch (IllegalArgumentException e)
-        {
-            // ...due to bad charset name.
-            e.printStackTrace();
-            assert false;
-        }
+            String auth = "Basic" + keyBase64;
 
-        try
-        {
             HttpRequest.Builder reqBuilder = HttpRequest.newBuilder();
             HttpRequest req = reqBuilder.uri(getAuthUrl().toURI())
                                         .GET()
                                         .header("Authorization", auth)
                                         .build();
 
-            HttpClient client = HttpClient.newHttpClient();
+            HttpClientProxy client = new HttpClientProxy();
 
-            HttpResponse<String> res
-            = client.send(req, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> res = client.send(req);
 
             return new AuthorizeAccountResult(res.body());
         }
-        catch (URISyntaxException e)
+        catch (UnsupportedCharsetException e)
+        {
+            e.printStackTrace();
+            assert false;
+            return null;
+        }
+        catch (IllegalCharsetNameException e)
         {
             e.printStackTrace();
             assert false;
@@ -70,17 +56,18 @@ public class Api
         }
         catch (IllegalArgumentException e)
         {
-            throw new ApiConnectException(e);
+            // ...due to bad charset name.
+            e.printStackTrace();
+            assert false;
+            return null;
         }
-        catch (SecurityException e)
+        catch (URISyntaxException e)
         {
-            throw new ApiConnectException(e);
+            e.printStackTrace();
+            assert false;
+            return null;
         }
-        catch (IOException e)
-        {
-            throw new ApiConnectException(e);
-        }
-        catch (InterruptedException e)
+        catch (HttpException e)
         {
             throw new ApiConnectException(e);
         }
