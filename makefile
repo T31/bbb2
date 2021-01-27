@@ -16,7 +16,7 @@ SRC = src/bbb2/Bbb2.java\
 
 TST = tst/ApiResultsTests.java\
       tst/StandardLibTests.java\
-      tst/ApiTests.java
+      tst/ApiProxyTests.java
 
 JSON_JAR = extern/javax.json/javax.json.jar
 

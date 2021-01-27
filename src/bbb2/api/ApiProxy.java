@@ -1,4 +1,6 @@
 package bbb2.api;
 
-public class ApiProxy
+import bbb2.api.Api;
+
+public class ApiProxy extends Api
 {}

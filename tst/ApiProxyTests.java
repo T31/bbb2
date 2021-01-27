@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import bbb2.util.http.HttpClientProxyBuilder;
 
-public class ApiTests
+public class ApiProxyTests
 {
     @BeforeAll
     public static void setup()

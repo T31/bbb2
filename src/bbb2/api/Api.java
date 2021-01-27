@@ -1,4 +1,4 @@
-package Bbb2.Api;
+package bbb2.api;
 
 import java.io.IOException;
 import java.net.http.HttpRequest;
