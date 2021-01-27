@@ -14,8 +14,9 @@ import java.util.Base64;
 import bbb2.api.ApiConnectException;
 import bbb2.api.ApiResponseParseException;
 import bbb2.api.results.AuthorizeAccountResult;
-import bbb2.util.HttpException;
-import bbb2.util.HttpClientProxy;
+import bbb2.util.http.HttpException;
+import bbb2.util.http.HttpClientProxy;
+import bbb2.util.http.HttpClientProxyBuilder;
 
 public class Api
 {
@@ -36,8 +37,7 @@ public class Api
                                         .header("Authorization", auth)
                                         .build();
 
-            HttpClientProxy client = new HttpClientProxy();
-
+            HttpClientProxy client = HttpClientProxyBuilder.build();
             HttpResponse<String> res = client.send(req);
 
             return new AuthorizeAccountResult(res.body());

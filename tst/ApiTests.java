@@ -2,14 +2,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import bbb2.util.HttpClientProxy;
+import bbb2.util.http.HttpClientProxyBuilder;
 
 public class ApiTests
 {
     @BeforeAll
     public static void setup()
     {
-        HttpClientProxy.testMode = true;
+        HttpClientProxyBuilder.testMode = true;
     }
 
     @Test

@@ -1,4 +1,4 @@
-package bbb2.util;
+package bbb2.util.http;
 
 public class HttpException extends Exception
 {
