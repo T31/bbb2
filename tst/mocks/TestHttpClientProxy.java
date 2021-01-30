@@ -64,16 +64,9 @@ public class TestHttpClientProxy implements HttpClientProxy
 
     public HttpResponse<String> send(HttpRequest req) throws HttpException
     {
-        try
+        if (req.uri() == Api.getAuthUri())
         {
-            if (req.uri() == Api.getAuthUrl().toURI())
-            {
-                return new MockResponse<String>();
-            }
-        }
-        catch (URISyntaxException e)
-        {
-            e.printStackTrace();
+            return new MockResponse<String>();
         }
 
         return null;

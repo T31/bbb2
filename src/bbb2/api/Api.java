@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
@@ -33,7 +33,7 @@ public class Api
             String auth = "Basic" + keyBase64;
 
             HttpRequest.Builder reqBuilder = HttpRequest.newBuilder();
-            HttpRequest req = reqBuilder.uri(getAuthUrl().toURI())
+            HttpRequest req = reqBuilder.uri(getAuthUri())
                                         .GET()
                                         .header("Authorization", auth)
                                         .build();
@@ -62,28 +62,22 @@ public class Api
             System.exit(ExitCode.PROGRAM_ERROR);
             return null;
         }
-        catch (URISyntaxException e)
-        {
-            e.printStackTrace();
-            System.exit(ExitCode.PROGRAM_ERROR);
-            return null;
-        }
         catch (HttpException e)
         {
             throw new ApiConnectException(e);
         }
     }
 
-    public static URL getAuthUrl()
+    public static URI getAuthUri()
     {
         try
         {
-            String urlString
+            String uriString
             = "https://api.backblazeb2.com/b2api/v2/b2_authorize_account";
 
-            return new URL(urlString);
+            return new URI(uriString);
         }
-        catch (MalformedURLException e)
+        catch (URISyntaxException e)
         {
             e.printStackTrace();
             System.exit(ExitCode.PROGRAM_ERROR);
