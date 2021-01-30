@@ -74,7 +74,7 @@ public class Api
         }
     }
 
-    private static URL getAuthUrl()
+    public static URL getAuthUrl()
     {
         try
         {
