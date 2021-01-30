@@ -1,6 +1,8 @@
 package bbb2.util.http;
 
-public class HttpException extends Exception
+import bbb2.Bbb2Exception;
+
+public class HttpException extends Bbb2Exception
 {
     public HttpException(String msg)
     {

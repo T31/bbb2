@@ -11,6 +11,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Base64;
 
+import bbb2.ExitCode;
 import bbb2.api.ApiConnectException;
 import bbb2.api.ApiResponseParseException;
 import bbb2.api.results.AuthorizeAccountResult;
@@ -45,26 +46,26 @@ public class Api
         catch (UnsupportedCharsetException e)
         {
             e.printStackTrace();
-            assert false;
+            System.exit(ExitCode.PROGRAM_ERROR);
             return null;
         }
         catch (IllegalCharsetNameException e)
         {
             e.printStackTrace();
-            assert false;
+            System.exit(ExitCode.PROGRAM_ERROR);
             return null;
         }
         catch (IllegalArgumentException e)
         {
             // ...due to bad charset name.
             e.printStackTrace();
-            assert false;
+            System.exit(ExitCode.PROGRAM_ERROR);
             return null;
         }
         catch (URISyntaxException e)
         {
             e.printStackTrace();
-            assert false;
+            System.exit(ExitCode.PROGRAM_ERROR);
             return null;
         }
         catch (HttpException e)
@@ -85,7 +86,7 @@ public class Api
         catch (MalformedURLException e)
         {
             e.printStackTrace();
-            assert false;
+            System.exit(ExitCode.PROGRAM_ERROR);
             return null;
         }
     }

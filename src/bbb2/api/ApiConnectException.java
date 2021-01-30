@@ -1,6 +1,8 @@
 package bbb2.api;
 
-public class ApiConnectException extends Exception
+import bbb2.Bbb2Exception;
+
+public class ApiConnectException extends Bbb2Exception
 {
     public ApiConnectException(String msg)
     {

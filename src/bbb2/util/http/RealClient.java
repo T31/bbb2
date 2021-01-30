@@ -5,6 +5,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import bbb2.ExitCode;
 import bbb2.util.http.HttpClientProxy;
 
 public class RealClient implements HttpClientProxy
@@ -24,7 +25,7 @@ public class RealClient implements HttpClientProxy
         catch (IllegalArgumentException e)
         {
             e.printStackTrace();
-            assert false;
+            System.exit(ExitCode.PROGRAM_ERROR);
             return null;
         }
         catch (InterruptedException e)

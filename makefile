@@ -1,6 +1,7 @@
 .PHONY: all test clean
 
 SRC = src/bbb2/Bbb2.java\
+      src/bbb2/Bbb2Exception.java\
       src/bbb2/ExitCode.java\
       src/bbb2/api/Api.java\
       src/bbb2/api/ApiConnectException.java\

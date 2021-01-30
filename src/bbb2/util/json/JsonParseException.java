@@ -1,6 +1,8 @@
 package bbb2.util.json;
 
-public class JsonParseException extends Exception
+import bbb2.Bbb2Exception;
+
+public class JsonParseException extends Bbb2Exception
 {
     public JsonParseException(String msg)
     {

@@ -1,6 +1,8 @@
 package bbb2.api;
 
-public class ApiResponseParseException extends Exception
+import bbb2.Bbb2Exception;
+
+public class ApiResponseParseException extends Bbb2Exception
 {
     public ApiResponseParseException(String msg)
     {
