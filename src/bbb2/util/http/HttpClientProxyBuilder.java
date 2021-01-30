@@ -2,19 +2,18 @@ package bbb2.util.http;
 
 import bbb2.util.http.HttpClientProxy;
 import bbb2.util.http.RealClient;
-import bbb2.util.http.TestClient;
 
 public class HttpClientProxyBuilder
 {
     public static HttpClientProxy build()
     {
-        if (testMode)
+        if (null == mock)
         {
-            return new TestClient();
+            return new RealClient();
         }
 
-        return new RealClient();
+        return mock;
     }
 
-    public static boolean testMode = false;
+    public static HttpClientProxy mock = null;
 }

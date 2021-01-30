@@ -3,13 +3,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import bbb2.util.http.HttpClientProxyBuilder;
+import mocks.TestHttpClientProxy;
 
 public class ApiProxyTests
 {
     @BeforeAll
     public static void setup()
     {
-        HttpClientProxyBuilder.testMode = true;
+        HttpClientProxyBuilder.mock = new TestHttpClientProxy();
     }
 
     @Test

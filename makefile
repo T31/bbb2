@@ -10,13 +10,13 @@ SRC = src/bbb2/Bbb2.java\
       src/bbb2/util/http/HttpClientProxyBuilder.java\
       src/bbb2/util/http/HttpException.java\
       src/bbb2/util/http/RealClient.java\
-      src/bbb2/util/http/TestClient.java\
       src/bbb2/util/json/JsonObjectProxy.java\
       src/bbb2/util/json/JsonParseException.java
 
-TST = tst/ApiResultsTests.java\
-      tst/StandardLibTests.java\
-      tst/ApiProxyTests.java
+TST = tst/unit_tests/ApiResultsTests.java\
+      tst/unit_tests/ApiProxyTests.java\
+      tst/unit_tests/StandardLibTests.java\
+      tst/mocks/TestHttpClientProxy.java
 
 JSON_JAR = extern/javax.json/javax.json.jar
 
